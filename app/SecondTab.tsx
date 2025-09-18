@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
-import { SafeAreaView, StyleSheet, View, Text } from 'react-native';
+import { SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import { SegmentedButtons } from 'react-native-paper';
-import ThirdlyTab from './ThirdlyTab'
+import ThirdlyTab from './ThirdlyTab';
 
-const TabContent = ({ title }) => (
+interface TabContentProps {
+  title: string;
+}
+
+const TabContent = ({ title }: TabContentProps) => (
   <View style={styles.contentContainer}>
     <Text style={styles.contentText}>{`这是${title}标签页的内容`}</Text>
   </View>

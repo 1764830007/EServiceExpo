@@ -1,7 +1,5 @@
-import { Tabs } from 'expo-router';
-
 import Ionicons from '@expo/vector-icons/Ionicons';
-
+import { Tabs } from 'expo-router';
 
 export default function TabLayout() {
   return (
@@ -16,7 +14,7 @@ export default function TabLayout() {
           headerShown: false,
           title: '首页',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home-sharp' : 'home-outline'} color={color} size={24} />
+            <Ionicons name={focused ? 'home' : 'home-outline'} color={color} size={24} />
           ),
         }}
       />
@@ -26,7 +24,7 @@ export default function TabLayout() {
           headerShown: false,
           title: '设备',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+            <Ionicons name={focused ? 'hardware-chip' : 'hardware-chip-outline'} color={color} size={24}/>
           ),
         }}
       />
@@ -36,7 +34,7 @@ export default function TabLayout() {
           headerShown: false,
           title: '设置',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'information-circle' : 'information-circle-outline'} color={color} size={24}/>
+            <Ionicons name={focused ? 'settings' : 'settings-outline'} color={color} size={24}/>
           ),
         }}
       />

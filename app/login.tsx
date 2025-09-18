@@ -4,11 +4,13 @@ import { Link, useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Button } from 'react-native-paper';
-
+import { useAuth } from './contexts/AuthContext';
 export default function Login() {
   const [emailOrPhone, setEmailOrPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const { login } = useAuth(); // 使用 AuthContext
 
   const handleLogin = async () => {
     if (!emailOrPhone) {
@@ -19,14 +21,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // 简单的模拟验证 - 只要输入不为空就认为登录成功
-      // 存储登录状态
-      await AsyncStorage.setItem('isLoggedIn', 'true');
+      // 使用 AuthContext 的登录方法
+      await login();
       await AsyncStorage.setItem('username', emailOrPhone);
       
-        // 使用 router 进行导航，兼容移动端和 web 端
-        // 直接导航到首页
-        router.navigate('/(tabs)/device');
+      // 直接导航
+      router.replace('/(tabs)');
     } catch (error) {
       Alert.alert('错误', '登录过程中发生错误');
       console.error('Login error:', error);

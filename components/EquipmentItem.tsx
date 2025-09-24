@@ -1,28 +1,19 @@
-import EquipmentItem from "@/components/EquipmentItem";
-import { useRouter } from "expo-router";
-import {
-  FlatList,
-  StyleSheet,
-  View
-} from "react-native";
-import { Appbar } from "react-native-paper";
-import equipmentMenus from "../../assets/data/EquipmentMenus.json";
+import { EquipmentMenuProps } from "@/constants/types";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Icon } from "react-native-paper";
 
-export default function DeviceScreen() {
-  const router = useRouter();
-
+export default function EquipmentItem({ equipmentMenu }: EquipmentMenuProps) {
   return (
-    <View style={styles.container}>
-     <Appbar.Header style={styles.bar}>
-        <Appbar.Content title="设备管理" />
-      </Appbar.Header> 
-
-      <FlatList
-        data={equipmentMenus}
-        renderItem={({ item }) => <EquipmentItem equipmentMenu={item} />}
-        keyExtractor={(item) => item.id}
-      />
-    </View>
+    <TouchableOpacity
+      style={styles.profileList}
+      onPress={() => console.log(`Clicked on ${equipmentMenu.title}`)}
+    >
+      <View style={styles.leftContent}>
+        <Icon source={equipmentMenu.icon} size={24} />
+        <Text style={styles.profileListContent}>{equipmentMenu.title}</Text>
+      </View>
+      <Icon source="chevron-right" size={24} />
+    </TouchableOpacity>
   );
 }
 
@@ -52,8 +43,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between", // 左右两端对齐
     paddingVertical: 12, // 垂直内边距
     paddingHorizontal: 16, // 水平内边距
-    height: 100,
+    height: 60,
     marginTop: 15,
+    width: "90%",
+    margin: "auto",
+    borderRadius: 8,
   },
 
   leftContent: {

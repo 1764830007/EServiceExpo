@@ -48,8 +48,8 @@ export default function RootLayout() {
         <RouteProtection>
           <Stack>
             <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="login" options={{ headerShown: false }} />
-            <Stack.Screen name="testpage" options={{ headerShown: false }} />
+            {/* <Stack.Screen name="login" options={{ headerShown: false }} />
+            <Stack.Screen name="testpage" options={{ headerShown: false }} /> */}
           </Stack>
           <StatusBar style="auto" />
         </RouteProtection>

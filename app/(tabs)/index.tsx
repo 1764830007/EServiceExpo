@@ -3,6 +3,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
+  Alert,
   Modal,
   ScrollView,
   StyleSheet, Text,
@@ -12,12 +13,31 @@ import { Appbar, Avatar, Button, Icon, PaperProvider } from 'react-native-paper'
 import { Tabs, TabScreen, TabsProvider } from 'react-native-paper-tabs';
 import DeviceForm from '../DeviceForm';
 import SecondTab from '../SecondTab';
+import { api } from '../services/api';
+
+// 设备列表响应接口
+interface EquipmentResponse {
+  result?: {
+    items?: Array<{
+      id: number;
+      name: string;
+      code: string;
+      // 可以根据实际API响应添加更多字段
+    }>;
+    totalCount?: number;
+  };
+  success?: boolean;
+  error?: string;
+}
 
 export default function Index() {
   const router = useRouter();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [devices, setDevices] = useState<{name: string; type: string}[]>([]);
   const [deviceCount, setDeviceCount] = useState(0);
+  const [apiData, setApiData] = useState<any>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleAddDeviceClick = () => {
     setIsFormVisible(true);
@@ -43,6 +63,58 @@ export default function Index() {
       router.replace('/login');
     } catch (error) {
       console.error('Logout error:', error);
+    }
+  };
+
+  // 保存token到本地存储
+  const saveToken = async () => {
+    try {
+      await AsyncStorage.setItem('authToken', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjE1MTIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiRjhNSl9saW1pbmdodSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6ImxpYW5nLmxpLm1pbkBzaW1lZGFyYnkuY29tLmhrIiwiQXNwTmV0LklkZW50aXR5LlNlY3VyaXR5U3RhbXAiOiIzNDQ4ZWFiMS0zYWNkLTNiZDgtZDU0Yi0zOWZhMjUxYjYyMGMiLCJzdWIiOiIxNTEyIiwianRpIjoiYWIwNGY2NGQtZGNlNC00MTk3LWEyYzItNWY5OTExYzZiMGI2IiwiaWF0IjoxNzU4MDg5MzU4LCJTZXNzaW9uLk1haW5EZWFsZXJDb2RlIjoiRjhNSiIsIm5iZiI6MTc1ODA4OTM1OCwiZXhwIjoxNzU4MTc1NzU4LCJpc3MiOiJEQ1AiLCJhdWQiOiJEQ1AifQ.rVoiTUgyRpaUGNCkI080-W26XNGR2MAXUU-g2MNpco0');
+      Alert.alert('Token已保存', '认证token已成功保存到本地存储');
+    } catch (error) {
+      Alert.alert('保存失败', '保存token时发生错误');
+    }
+  };
+
+  // 获取设备列表
+  const handleGetEquipments = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // 直接使用API地址调用，并指定返回类型
+      const data: EquipmentResponse = await api.get('services/app/EquipmentService/Equipments?limit=10&offset=0');
+      console.log('data:', data);
+      setApiData(data);
+      
+      // 根据API响应结构正确获取设备数量
+      const deviceCount = data.result?.totalCount || 0;
+      Alert.alert('API测试成功', `成功获取设备列表，共${deviceCount}台设备`);
+    } catch (err: any) {
+      setError(err.message || 'API请求失败');
+      Alert.alert('请求失败', err.message || '请检查网络连接和服务器状态');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // POST请求示例
+  const handlePostApiCall = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // 示例：创建一个新的帖子
+      const data = await api.post('https://jsonplaceholder.typicode.com/posts', {
+        title: '测试标题',
+        body: '测试内容',
+        userId: 1,
+      });
+      setApiData(data);
+      Alert.alert('POST请求成功', '数据已成功创建');
+    } catch (err: any) {
+      setError(err.message || 'POST请求失败');
+      Alert.alert('POST请求失败', err.message || '请检查网络连接');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,6 +179,59 @@ export default function Index() {
               <Text style={{ fontSize: 20, fontWeight: 'bold' }}>0</Text>
             </View>
           </View>
+        </View>
+
+        {/* API测试区域 */}
+        <View style={[styles.addDevice, { padding: 20, marginTop: 20 }]}>
+          <Text style={styles.sectionTitle}>API测试</Text>
+          
+          <View style={styles.apiButtonContainer}>
+            <Button
+              onPress={saveToken}
+              mode="contained"
+              style={styles.apiButton}
+              buttonColor="green"
+            >
+              保存Token
+            </Button>
+            
+            <Button
+              onPress={handleGetEquipments}
+              mode="contained"
+              style={styles.apiButton}
+              loading={loading}
+              disabled={loading}
+            >
+              获取设备列表
+            </Button>
+          </View>
+
+          <View style={styles.apiButtonContainer}>
+            <Button
+              onPress={handlePostApiCall}
+              mode="outlined"
+              style={styles.apiButton}
+              loading={loading}
+              disabled={loading}
+            >
+              POST请求测试
+            </Button>
+          </View>
+
+          {error && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>错误: {error}</Text>
+            </View>
+          )}
+
+          {apiData && (
+            <View style={styles.apiResultContainer}>
+              <Text style={styles.resultTitle}>API响应数据:</Text>
+              <Text style={styles.resultText}>
+                {JSON.stringify(apiData, null, 2)}
+              </Text>
+            </View>
+          )}
         </View>
         <View style={{
           marginTop: 20,
@@ -315,5 +440,48 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+    color: '#333',
+  },
+  apiButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  apiButton: {
+    flex: 1,
+    marginHorizontal: 8,
+  },
+  errorContainer: {
+    backgroundColor: '#ffebee',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+  },
+  errorText: {
+    color: '#c62828',
+    fontSize: 14,
+  },
+  apiResultContainer: {
+    backgroundColor: '#f5f5f5',
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  resultTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 8,
+    color: '#333',
+  },
+  resultText: {
+    fontSize: 12,
+    color: '#666',
+    fontFamily: 'monospace',
   }
 });

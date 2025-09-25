@@ -65,7 +65,7 @@ export default function Login() {
       </View>
 
       <View style={styles.registerContainer}>
-        <Text>You don't have an account?</Text>
+        <Text>Don't have an account?</Text>
         <Link href="/(tabs)/device">
         Go to About screen
       </Link>

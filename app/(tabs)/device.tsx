@@ -1,103 +1,40 @@
-import { useRouter } from 'expo-router';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Appbar, Icon } from 'react-native-paper';
+import EquipmentItem from "@/components/EquipmentItem";
+import { useRouter } from "expo-router";
+import {
+  FlatList,
+  StyleSheet,
+  View
+} from "react-native";
+import { Appbar } from "react-native-paper";
+import equipmentMenus from "../../assets/data/EquipmentMenus.json";
 
 export default function DeviceScreen() {
   const router = useRouter();
+
   return (
     <View style={styles.container}>
-      <Appbar.Header style={styles.bar}>
-        {/* 占位 */}
-        <Appbar.Content
-          title="设备管理"
-        />
-      </Appbar.Header>
-      <TouchableOpacity
-        style={styles.profileList}
-        onPress={() => console.log('设备管理汇总点击')}
-      >
-        <View style={styles.leftContent}>
-          <Icon source="file" size={30} />
-          <Text style={styles.profileListContent}>设备管理汇总</Text>
-        </View>
-        <Icon
-          source="chevron-right"
-          size={20}
-          color="#999"
-        />
-      </TouchableOpacity>
+     <Appbar.Header style={styles.bar}>
+        <Appbar.Content title="设备管理" />
+      </Appbar.Header> 
 
-      <View style={[styles.profileList]}>
-        <View style={styles.leftContent}>
-          <Icon source="file" size={30} />
-          <Text style={styles.profileListContent}>设备统计报告</Text>
-        </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
-
-      <View style={[styles.profileList]}>
-        <View style={styles.leftContent}>
-          <Icon source="file" size={30} />
-          <Text style={styles.profileListContent}>设备故障报警</Text>
-        </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
-
-      <View style={[styles.profileList]}>
-        <View style={styles.leftContent}>
-          <Icon source="file" size={30} />
-          <Text style={styles.profileListContent}>电子围栏</Text>
-        </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
-      <View style={[styles.profileList]}>
-        <View style={styles.leftContent}>
-          <Icon source="file" size={30} />
-          <Text style={styles.profileListContent}>设备绑定申请列表</Text>
-        </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
-      <View style={[styles.profileList]}>
-        <View style={styles.leftContent}>
-          <Icon source="file" size={30} />
-          <Text style={styles.profileListContent}>创建绑定申请</Text>
-        </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
+      <FlatList
+        data={equipmentMenus}
+        renderItem={({ item }) => <EquipmentItem equipmentMenu={item} />}
+        keyExtractor={(item) => item.id}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#E8E8E8',
-    height: '100%',
+    backgroundColor: "#eee",
   },
   bar: {
     elevation: 4,
 
     // iOS 阴影
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
@@ -106,25 +43,25 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   barIcon: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
   },
   profileList: {
-    backgroundColor: '#FFFFFF',
-    flexDirection: 'row',    // 横向排列
-    alignItems: 'center',    // 垂直居中
-    justifyContent: 'space-between', // 左右两端对齐
-    paddingVertical: 12,     // 垂直内边距
-    paddingHorizontal: 16,   // 水平内边距
+    backgroundColor: "#FFFFFF",
+    flexDirection: "row", // 横向排列
+    alignItems: "center", // 垂直居中
+    justifyContent: "space-between", // 左右两端对齐
+    paddingVertical: 12, // 垂直内边距
+    paddingHorizontal: 16, // 水平内边距
     height: 100,
-    marginTop: 15
+    marginTop: 15,
   },
 
   leftContent: {
-    flexDirection: 'row',    // 图标和文字横向排列
-    alignItems: 'center',    // 垂直居中
+    flexDirection: "row", // 图标和文字横向排列
+    alignItems: "center", // 垂直居中
   },
   profileListContent: {
-    marginLeft: 12,          // 文字与左边图标的间距
+    marginLeft: 12, // 文字与左边图标的间距
     fontSize: 16,
   },
 });

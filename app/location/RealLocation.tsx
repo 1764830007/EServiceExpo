@@ -1,5 +1,6 @@
 import * as Location from "expo-location";
-import { $, atom } from "helux";
+// import { atom, signal } from "helux";
+import { useComputed, useSignal, useSignalEffect } from "@preact/signals-react";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { Button } from "react-native-paper";
@@ -8,7 +9,13 @@ export default function RealLocation() {
   const [location, setLocation] = useState<Location.LocationObject | null>();
   const [address, setAddress] =
     useState<Location.LocationGeocodedAddress | null>();
-  const [num, setNum] = atom({ a: 1, b: { b1: 2 } });
+  // const [num, setNum] = atom(() => ({ a: 1, b: { b1: 2 } }));
+  const count = useSignal(0);
+  const computedCount = useComputed(() => count.value * 2);
+
+  useSignalEffect(() => {
+    console.log("count changed:", count.value);
+  })
 
   // get location permission
   const getPermission = async () => {
@@ -52,14 +59,17 @@ export default function RealLocation() {
 
   return (
     <View>
+      {/* use signals */}
+      <Text>Count: {count}</Text>
+      <Text>Computed Count (Count * 2): {computedCount}</Text>
       {address && <Text>{address.city}</Text>}
       {location && (
         <Text>
           Lat: {location.coords.latitude}, Lon: {location.coords.longitude}
         </Text>
       )}
-      <Text>{ $(num.val.b.b1) }</Text>
-      <Button
+      {/* <Text>{ signal(num.val.b.b1) }</Text> */}
+      {/* <Button
         style={{ backgroundColor: "white" }}
         onPress={() => {
           console.log("button pressed");
@@ -69,7 +79,9 @@ export default function RealLocation() {
         }}
       >
         test1
-      </Button>
+      </Button> */}
+      <Button style={{backgroundColor: 'white'}}  
+        onPress={() => count.value++ }>AddCount</Button>
     </View>
   );
 }

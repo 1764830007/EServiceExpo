@@ -2,6 +2,7 @@ import EquipmentItem from "@/components/EquipmentItem";
 import { useRouter } from "expo-router";
 import {
   FlatList,
+  ScrollView,
   StyleSheet,
   View
 } from "react-native";
@@ -12,7 +13,8 @@ export default function DeviceScreen() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <ScrollView>
+<View style={styles.container}>
      <Appbar.Header style={styles.bar}>
         <Appbar.Content title="设备管理" />
       </Appbar.Header> 
@@ -23,6 +25,8 @@ export default function DeviceScreen() {
         keyExtractor={(item) => item.id}
       />
     </View>
+    </ScrollView>
+    
   );
 }
 

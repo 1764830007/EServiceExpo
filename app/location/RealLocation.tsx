@@ -1,10 +1,14 @@
 import * as Location from "expo-location";
-import { useEffect, useState } from "react";
+import { $, atom } from "helux";
+import { useState } from "react";
 import { Text, View } from "react-native";
+import { Button } from "react-native-paper";
 
 export default function RealLocation() {
   const [location, setLocation] = useState<Location.LocationObject | null>();
-  const [address, setAddress] = useState<Location.LocationGeocodedAddress | null>();
+  const [address, setAddress] =
+    useState<Location.LocationGeocodedAddress | null>();
+  const [num, setNum] = atom({ a: 1, b: { b1: 2 } });
 
   // get location permission
   const getPermission = async () => {
@@ -24,7 +28,7 @@ export default function RealLocation() {
       accuracy: Location.Accuracy.Highest,
     });
 
-    if(currentLocation) {
+    if (currentLocation) {
       setLocation(currentLocation);
       console.log("location:", currentLocation);
       const { latitude, longitude } = currentLocation.coords;
@@ -36,20 +40,36 @@ export default function RealLocation() {
   // get address from location
   const getAddress = async () => {
     //await getLocation();
-    if(!location) return;
+    if (!location) return;
     const currentAddress = await Location.reverseGeocodeAsync(location!.coords);
     setAddress(currentAddress[0]);
     console.log("address", address);
   };
 
-  useEffect(() => {
-    getLocation();
-  }, []);
+  // useEffect(() => {
+  //   getLocation();
+  // }, []);
 
   return (
     <View>
-      {address && (<Text>{address.city}</Text>) }
-      {location && (<Text>Lat: {location.coords.latitude}, Lon: {location.coords.longitude}</Text>) }
+      {address && <Text>{address.city}</Text>}
+      {location && (
+        <Text>
+          Lat: {location.coords.latitude}, Lon: {location.coords.longitude}
+        </Text>
+      )}
+      <Text>{ $(num.val.b.b1) }</Text>
+      <Button
+        style={{ backgroundColor: "white" }}
+        onPress={() => {
+          console.log("button pressed");
+          setNum((item) => {
+            item.b.b1 += 10;
+          });
+        }}
+      >
+        test1
+      </Button>
     </View>
   );
 }

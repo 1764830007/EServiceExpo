@@ -56,5 +56,11 @@
     "title": "test3",
     "icon": "github",
     "link": "/location/RealLocation"
+},
+{
+     "id": "equipment-11",
+    "title": "camera",
+    "icon": "paperclip",
+    "link": "/camera/Camera"
 }
 ]

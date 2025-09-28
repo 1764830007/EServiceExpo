@@ -1,6 +1,5 @@
+import UserCtx from "@/hooks/UserStore";
 import * as Location from "expo-location";
-// import { atom, signal } from "helux";
-import { useComputed, useSignal, useSignalEffect } from "@preact/signals-react";
 import { useState } from "react";
 import { Text, View } from "react-native";
 import { Button } from "react-native-paper";
@@ -9,14 +8,11 @@ export default function RealLocation() {
   const [location, setLocation] = useState<Location.LocationObject | null>();
   const [address, setAddress] =
     useState<Location.LocationGeocodedAddress | null>();
+  //const [user, setUser, userCtx] = atom<User|null>(null);
+  const userCtx = UserCtx.useStore();
+  const userLoading = UserCtx.useLoading();
+  const {loading, err, ok} = userLoading.fetchUser;
   // const [num, setNum] = atom(() => ({ a: 1, b: { b1: 2 } }));
-  const count = useSignal(0);
-  const computedCount = useComputed(() => count.value * 2);
-
-  useSignalEffect(() => {
-    console.log("count changed:", count.value);
-  })
-
   // get location permission
   const getPermission = async () => {
     let { status } = await Location.requestForegroundPermissionsAsync();
@@ -60,8 +56,8 @@ export default function RealLocation() {
   return (
     <View>
       {/* use signals */}
-      <Text>Count: {count}</Text>
-      <Text>Computed Count (Count * 2): {computedCount}</Text>
+      <Text>User Id: {userCtx.user.id}, user name:{userCtx.user.name}, user email:{userCtx.user.email}</Text>
+      {/* <Text>Computed Count (Count * 2): {computedCount}</Text> */}
       {address && <Text>{address.city}</Text>}
       {location && (
         <Text>
@@ -69,19 +65,15 @@ export default function RealLocation() {
         </Text>
       )}
       {/* <Text>{ signal(num.val.b.b1) }</Text> */}
-      {/* <Button
+      <Button
         style={{ backgroundColor: "white" }}
         onPress={() => {
+          userCtx.fetchUser();
           console.log("button pressed");
-          setNum((item) => {
-            item.b.b1 += 10;
-          });
         }}
       >
-        test1
-      </Button> */}
-      <Button style={{backgroundColor: 'white'}}  
-        onPress={() => count.value++ }>AddCount</Button>
+        Modify User
+      </Button>
     </View>
   );
 }

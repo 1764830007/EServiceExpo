@@ -1,0 +1,14 @@
+const en = {
+  home: {
+    index: "index",
+    equipment: "equipment",
+    setting: "setting",
+  },
+  changeLocale: "change language",
+  equipment: {
+    equipment: "equipment",
+    management: "equipment management",
+  },
+};
+
+export default en;

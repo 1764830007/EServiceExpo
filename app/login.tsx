@@ -1,36 +1,95 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link, useRouter } from 'expo-router';
 
-import { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, EmitterSubscription, Linking, StyleSheet, Text, View } from 'react-native';
 import { Button } from 'react-native-paper';
+import { Consts } from '../constants/config';
 import { useAuth } from './contexts/AuthContext';
 export default function Login() {
-  const [emailOrPhone, setEmailOrPhone] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [emailOrPhone, setEmailOrPhone] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
 
   const { login } = useAuth(); // 使用 AuthContext
-
   const handleLogin = async () => {
-    if (!emailOrPhone) {
-      Alert.alert('错误', '请输入手机号或邮箱');
-      return;
-    }
+    // Open the external auth page in the browser. The external provider must
+    // redirect back to the app using a deep link (see REDIRECT_URI) with a
+    // token or code.
+    const baseLogin = Consts.Config.LoginUrl || `https://${Consts.Config.Host}/Login/GetB2CLogin`;
+    const AUTH_URL = `${baseLogin}?isFromMobile=true&hint=${encodeURIComponent(
+      emailOrPhone
+    )}&redirect_uri=myapp://auth-callback`;
+    const REDIRECT_SCHEME = 'myapp://auth-callback';
 
     setLoading(true);
 
+  // Handler for incoming deep links
+  let subscription: EmitterSubscription | null = null;
+
+    const handleUrl = async ({ url }: { url: string }) => {
+      try {
+        // Example redirect: myapp://auth-callback?token=abc123&user=john
+        const parsed = new URL(url);
+        const token = parsed.searchParams.get('token');
+        const user = parsed.searchParams.get('user') || emailOrPhone;
+
+        if (!token) {
+          Alert.alert('登录失败', '未收到 token');
+          return;
+        }
+
+        // Store token locally and call the app login method.
+        await AsyncStorage.setItem('authToken', token);
+        await AsyncStorage.setItem('username', user);
+        // AuthContext.login() in this project doesn't accept a token; it just
+        // marks the user as logged in. Adapt if your context accepts tokens.
+        await login();
+        router.replace('/(tabs)');
+      } catch (err) {
+        console.error('Auth redirect handling failed', err);
+        Alert.alert('错误', '处理回调时出错');
+      } finally {
+        setLoading(false);
+        // Remove listener after handling
+        if (subscription) {
+          try {
+            subscription.remove();
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+    };
+
+    // Add listener and open URL
     try {
-      // 使用 AuthContext 的登录方法
-      await login();
-      await AsyncStorage.setItem('username', emailOrPhone);
-      
-      // 直接导航
-      router.replace('/(tabs)');
-    } catch (error) {
-      Alert.alert('错误', '登录过程中发生错误');
-      console.error('Login error:', error);
-    } finally {
+      // addEventListener returns a subscription with a `remove()` method.
+      subscription = Linking.addEventListener('url', handleUrl as any);
+      // If app was already opened via the redirect, check the initial URL
+      const initial = await Linking.getInitialURL();
+      if (initial && initial.startsWith(REDIRECT_SCHEME)) {
+        await handleUrl({ url: initial });
+        if (subscription) {
+          try {
+            subscription.remove();
+          } catch (e) {}
+          subscription = null;
+        }
+        return;
+      }
+
+      // Open external browser (will leave the app)
+      const supported = await Linking.canOpenURL(AUTH_URL);
+      if (supported) {
+        await Linking.openURL(AUTH_URL);
+      } else {
+        Alert.alert('无法打开链接', AUTH_URL);
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Failed to start external auth', err);
+      Alert.alert('错误', '无法打开外部登录页面');
       setLoading(false);
     }
   };
@@ -41,16 +100,6 @@ export default function Login() {
       <Text style={styles.brandText}>A Caterpillar Brand</Text>
 
       <View style={styles.inputContainer}>
-        {/* 手机号/邮箱输入框 */}
-        <TextInput
-          style={styles.input}
-          placeholder="请输入手机号或邮箱"
-          value={emailOrPhone}
-          onChangeText={setEmailOrPhone}
-          autoCapitalize="none"
-          keyboardType="email-address"
-        />
-
         {/* 登录按钮 - 添加在输入框下方 */}
         <Button
           onPress={handleLogin}

@@ -1,6 +1,6 @@
 // app/contexts/AuthContext.tsx
-import React, { createContext, useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 interface AuthContextType {
   isLoggedIn: boolean | null;
@@ -52,3 +52,6 @@ export function useAuth() {
   }
   return context;
 }
+
+// default export so expo-router doesn't warn about a missing route component
+export default AuthProvider;

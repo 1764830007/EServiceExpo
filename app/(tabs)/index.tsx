@@ -13,7 +13,7 @@ import { Appbar, Avatar, Button, Icon, PaperProvider } from 'react-native-paper'
 import { Tabs, TabScreen, TabsProvider } from 'react-native-paper-tabs';
 import DeviceForm from '../DeviceForm';
 import SecondTab from '../SecondTab';
-import { api } from '../services/api';
+import api from '../services/api';
 
 // 设备列表响应接口
 interface EquipmentResponse {
@@ -60,7 +60,7 @@ export default function Index() {
       await AsyncStorage.removeItem('username');
       
       // 使用 router 进行导航，兼容移动端和 web 端
-      router.replace('/login');
+      router.replace('/User/login');
     } catch (error) {
       console.error('Logout error:', error);
     }

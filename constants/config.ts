@@ -36,7 +36,7 @@ export const Consts = {
     HostQa,
     HostDev,
     // LoginUrl used by mobile to start SSO/B2C flow
-    LoginUrl: `https://${Host}/Login/GetB2CLogin`,
+    LoginUrl: `https://${Host}/Login/GetB2CLogin?isFromMobile=true`,
     LogoutUrl: `https://${Host}/Oauth_Redirect_ECApp/Logout`,
     CallbackUrl: `https://${Host}/response-oidc`,
     LearnmoreUrl: 'https://www.semmachinery.com/',

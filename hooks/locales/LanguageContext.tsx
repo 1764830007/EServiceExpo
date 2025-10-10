@@ -1,11 +1,13 @@
+import { getLocales } from 'expo-localization';
+import { TFunction } from 'i18next';
 import { createContext, useContext, useEffect, useState } from "react";
-import i18n, { initLanguage, isValidLanguage, setLocalizeLocale } from "./i18n";
+import { useTranslation } from 'react-i18next';
+import i18n from "./i18n";
 
 export type LanguageContextProps  = {
   locale: string;
   setLanguage: (language: string) => Promise<void>;
-  t: (key: string) => string;
-  //localeStrings: Record<string, string>;
+  t: TFunction<"translation", undefined>
 }
 
 export const LanguageContext = createContext<LanguageContextProps|null>(null);
@@ -15,30 +17,22 @@ type LanguageProviderProps = {
 }
 
 export default function LanguageProvider({ children }: LanguageProviderProps) {
-  const [locale, setLocale] = useState(i18n.locale);
-  //const [localeStrings, setLocaleStrings] = useState(getLocalizeStrings());
+  const [locale, setLocale] = useState(i18n.language);
+  const { t } = useTranslation(); 
 
   useEffect(() => {
     const initialze = async () => {
-        await initLanguage();
-        setLocale(i18n.locale);
-        //setLocaleStrings(getLocalizeStrings());
+      const deviceLocale = getLocales()[0]?.languageCode || "en";
+      setLanguage(deviceLocale);
     };
     initialze();
   },[]);
 
  // Function to change the language and update localized strings
   const setLanguage = async (language: string) => {
-    const validLanguage = isValidLanguage(language) ? language : 'en';
-  
-    const newStrings = await setLocalizeLocale(validLanguage);
-    if (newStrings) {
-      setLocale(validLanguage);
-      //setLocaleStrings(newStrings);
-    }
+    i18n.changeLanguage(language);
+    setLocale(language);
   };
-
-  const t = (key: string) => i18n.t(key);
 
   return (
     <LanguageContext.Provider value={{ locale, setLanguage, t }}>

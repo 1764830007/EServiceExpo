@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { Appbar, Button, Divider, Icon, Text } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
 export default function SettingScreen() {
-  const {locale, setLanguage, t} = useLocalization();
+  const {locale, setLanguage, t } = useLocalization();
 
   const router = useRouter();
   const { logout } = useAuth();

@@ -15,21 +15,6 @@ import DeviceForm from '../DeviceForm';
 import SecondTab from '../SecondTab';
 import { api } from '../services/api';
 
-// 设备列表响应接口
-interface EquipmentResponse {
-  result?: {
-    items?: Array<{
-      id: number;
-      name: string;
-      code: string;
-      // 可以根据实际API响应添加更多字段
-    }>;
-    totalCount?: number;
-  };
-  success?: boolean;
-  error?: string;
-}
-
 export default function Index() {
   const router = useRouter();
   const [isFormVisible, setIsFormVisible] = useState(false);
@@ -81,13 +66,13 @@ export default function Index() {
     setLoading(true);
     setError(null);
     try {
-      // 直接使用API地址调用，并指定返回类型
-      const data: EquipmentResponse = await api.get('services/app/EquipmentService/Equipments?limit=10&offset=0');
-      console.log('data:', data);
+      // 直接使用API地址调用，并使用 Equipment 类型接收数据
+      const data = await api.get('services/app/EquipmentService/Equipments?limit=10&offset=0');
+      console.log('API响应数据:', data);
       setApiData(data);
       
       // 根据API响应结构正确获取设备数量
-      const deviceCount = data.result?.totalCount || 0;
+      const deviceCount = Array.isArray(data) ? data.length : (data as any)?.result?.length || 0;
       Alert.alert('API测试成功', `成功获取设备列表，共${deviceCount}台设备`);
     } catch (err: any) {
       setError(err.message || 'API请求失败');

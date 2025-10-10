@@ -1,18 +1,22 @@
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import { Button } from 'react-native-paper';
+import api from '../services/api';
 
 interface Nation {
   NationName: string;
+  ID: string;
   // Add other nation properties as needed
 }
 
@@ -30,11 +34,34 @@ export default function Register() {
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [nationList, setNationList] = useState<Nation[]>([
-    { NationName: 'China' },
-    { NationName: 'United States' },
-    // Add more nations as needed
-  ]);
+  const [nationList, setNationList] = useState<Nation[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchNations = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get('/services/app/GeoService/Nations?type=0');
+        // If your API returns { result: [...] }
+        const nations = (res.data.result || []).map((item: { text: string; value: string }) => ({
+          NationName: item.text,
+          ID: item.value,
+        }));
+        setNationList(nations);
+        // Set default country to 'CN' if present
+        const cn = nations.find((n:Nation) => n.ID === 'CN');
+        if (cn) {
+          setFormData((prev) => ({ ...prev, country: 'CN' }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch nations:', error);
+        Alert.alert('Error', 'Failed to load country list.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNations();
+  }, []);
 
   const handleSubmit = async () => {
     // Validate form
@@ -102,22 +129,26 @@ export default function Register() {
             <Text style={styles.requiredStar}>*</Text>
           </View>
           <View style={styles.pickerWrapper}>
-            <Picker
-              selectedValue={formData.country}
-              onValueChange={(value: string) => 
-                setFormData(prev => ({ ...prev, country: value }))
-              }
-              style={styles.picker}
-            >
-              <Picker.Item label="Click to Select" value="" />
-              {nationList.map((nation, index) => (
-                <Picker.Item
-                  key={index}
-                  label={nation.NationName}
-                  value={nation.NationName}
-                />
-              ))}
-            </Picker>
+            {loading ? (
+              <ActivityIndicator size="small" color="#007AFF" />
+            ) : (
+              <Picker
+                selectedValue={formData.country}
+                onValueChange={(value: string) =>
+                  setFormData(prev => ({ ...prev, country: value }))
+                }
+                style={styles.picker}
+              >
+                <Picker.Item label="Click to Select" value="" />
+                {nationList.map((nation) => (
+                  <Picker.Item
+                    key={nation.ID}
+                    label={nation.NationName}
+                    value={nation.ID}
+                  />
+                ))}
+              </Picker>
+            )}
           </View>
         </View>
 

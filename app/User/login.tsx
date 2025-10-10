@@ -141,6 +141,7 @@ export default function Login() {
           
           // Check if PIN is needed
           const pinStored = await AsyncStorage.getItem('userPIN');
+          console.log('PIN stored:', pinStored ? 'Yes' : 'No');
           if (!pinStored) {
             router.push('/pin-setup');
             return true;
@@ -172,7 +173,8 @@ export default function Login() {
   // Handle login button press
   const handleLogin = useCallback(async () => {
     const baseLogin = Consts.Config.LoginUrl || `https://${Consts.Config.Host}/Login/GetB2CLogin?isFromMobile=true`;
-    const AUTH_URL = `${baseLogin}&isDarkMode=true`;
+    const isDarkMode = false; // TODO: Detect system dark mode if needed
+    const AUTH_URL = `${baseLogin}&isDarkMode=${isDarkMode}`;
     setLoading(true);
     setAuthUrl(AUTH_URL);
     setShowWebView(true);
@@ -340,7 +342,7 @@ export default function Login() {
       return true;
     }
 
-    console.log('Blocking navigation to:', url);
+    //console.log('Blocking navigation to:', url);
     return true;
   }, [authUrl, handleTokenFromUrl]);
 

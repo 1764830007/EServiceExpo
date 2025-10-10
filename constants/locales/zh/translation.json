@@ -6,7 +6,10 @@
   },
   "changeLocale": "修改语言",
   "equipment": {
-    "equipment": "设备",
-    "management": "设备管理"
+    "management": "设备管理汇总",
+    "list": "设备管理列表",
+    "statisticReport": "设备统计",
+    "faultAlert": "设备故障报警",
+    "fence": "电子围栏"
   }
 }

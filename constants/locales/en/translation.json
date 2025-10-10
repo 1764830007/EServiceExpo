@@ -1,12 +1,15 @@
 {
   "home": {
-    "index": "index",
-    "equipment": "equipment",
-    "setting": "setting"
+    "index": "Homepage",
+    "equipment": "Equipment",
+    "setting": "Setting"
   },
   "changeLocale": "change language",
   "equipment": {
-    "equipment": "equipment",
-    "management": "equipment management"
+    "management": "Equipment Management",
+    "list": "Equipment List",
+    "statisticReport": "Equipment Statistic Report",
+    "faultAlert": "Equipment Fault Alert",
+    "fence": "Fence"
   }
 }

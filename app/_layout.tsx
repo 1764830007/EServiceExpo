@@ -52,10 +52,9 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <AuthProvider>
           <RouteProtection>
-            <Stack>
+            <Stack screenOptions={{animation: 'fade'}}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              {/* <Stack.Screen name="login" options={{ headerShown: false }} />
-            <Stack.Screen name="testpage" options={{ headerShown: false }} /> */}
+              <Stack.Screen name="devices/equipment-list" options={{ headerShown: false }} />
             </Stack>
             <StatusBar style="auto" />
           </RouteProtection>

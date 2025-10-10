@@ -1,3 +1,4 @@
+import { useLocalization } from "@/hooks/locales/LanguageContext";
 import { useRouter } from "expo-router";
 import {
   ScrollView,
@@ -9,58 +10,59 @@ import {
 import { Appbar, Icon } from "react-native-paper";
 
 export default function DeviceScreen() {
-  const router = useRouter();
+  const { t } = useLocalization();
+  const router= useRouter();
 
   return (
     <ScrollView>
       <View style={styles.container}>
         <Appbar.Header style={styles.bar} elevated>
           <Appbar.Content
-            title="设备管理"
+            title={t('equipment.management')}
             titleStyle={{ fontSize: 16, fontWeight: 600 }}
           />
         </Appbar.Header>
         {/* 设备管理汇总 */}
         <TouchableOpacity
           style={styles.deviceCard}
-          onPress={() => router.push("/devices/equipment-manage", {})}
+          onPress={() => router.push('/devices/equipment-list')}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Icon source="account-card" size={24}></Icon>
-            <Text style={{ marginLeft: 20 }}>设备管理汇总</Text>
+            <Text style={{ marginLeft: 20 }}>{t('equipment.list')}</Text>
           </View>
           <Icon source="chevron-right" size={24} />
         </TouchableOpacity>
         {/* 设备统计报告 */}
         <TouchableOpacity
           style={styles.deviceCard}
-          onPress={() => router.push("/devices/equipment-manage")}
+          onPress={() => router.push("/devices/equipment-list")}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Icon source="account-card" size={24}></Icon>
-            <Text style={{ marginLeft: 20 }}>设备统计报告</Text>
+            <Text style={{ marginLeft: 20 }}>{t('equipment.statisticReport')}</Text>
           </View>
           <Icon source="chevron-right" size={24} />
         </TouchableOpacity>
         {/* 设备故障报警 */}
         <TouchableOpacity
           style={styles.deviceCard}
-          onPress={() => router.push("/devices/equipment-manage")}
+          onPress={() => router.push("/devices/equipment-list")}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Icon source="account-card" size={24}></Icon>
-            <Text style={{ marginLeft: 20 }}>设备故障报警</Text>
+            <Text style={{ marginLeft: 20 }}>{t('equipment.faultAlert')}</Text>
           </View>
           <Icon source="chevron-right" size={24} />
         </TouchableOpacity>
         {/* 电子围栏 */}
         <TouchableOpacity
           style={styles.deviceCard}
-          onPress={() => router.push("/devices/equipment-manage")}
+          onPress={() => router.push("/devices/equipment-list")}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Icon source="account-card" size={24}></Icon>
-            <Text style={{ marginLeft: 20 }}>电子围栏</Text>
+            <Text style={{ marginLeft: 20 }}>{t('equipment.fence')}</Text>
           </View>
           <Icon source="chevron-right" size={24} />
         </TouchableOpacity>

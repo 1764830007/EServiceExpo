@@ -1,20 +1,30 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { Tabs } from 'expo-router';
+import { useLocalization } from "@/hooks/locales/LanguageContext";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Tabs } from "expo-router";
 
 export default function TabLayout() {
+  const { locale, t } = useLocalization();
+
+  console.log("locale", locale);
+
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#ffd33d',
+        tabBarActiveTintColor: "#013b84",
+        animation: 'shift'
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
           headerShown: false,
-          title: '首页',
+          title: t('home.index'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'home' : 'home-outline'} color={color} size={24} />
+            <Ionicons
+              name={focused ? "home" : "home-outline"}
+              color={color}
+              size={24}
+            />
           ),
         }}
       />
@@ -22,9 +32,13 @@ export default function TabLayout() {
         name="device"
         options={{
           headerShown: false,
-          title: '设备',
+          title: t('home.equipment'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'hardware-chip' : 'hardware-chip-outline'} color={color} size={24}/>
+            <Ionicons
+              name={focused ? "hardware-chip" : "hardware-chip-outline"}
+              color={color}
+              size={24}
+            />
           ),
         }}
       />
@@ -32,9 +46,13 @@ export default function TabLayout() {
         name="setting"
         options={{
           headerShown: false,
-          title: '设置',
+          title: t('home.setting'),
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'settings' : 'settings-outline'} color={color} size={24}/>
+            <Ionicons
+              name={focused ? "settings" : "settings-outline"}
+              color={color}
+              size={24}
+            />
           ),
         }}
       />

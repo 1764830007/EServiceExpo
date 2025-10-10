@@ -1,8 +1,11 @@
+import { useLocalization } from '@/hooks/locales/LanguageContext';
 import { useRouter } from 'expo-router';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Appbar, Divider, Icon, Text } from 'react-native-paper';
+import { Appbar, Button, Divider, Icon, Text } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
 export default function SettingScreen() {
+  const {locale, setLanguage, t } = useLocalization();
+
   const router = useRouter();
   const { logout } = useAuth();
   const handleLogout = async () => {
@@ -110,6 +113,11 @@ export default function SettingScreen() {
       >
         <Text style={styles.logoutText}>退出登录</Text>
       </TouchableOpacity>
+ 
+      <Button mode='contained' onPress={() => locale === 'zh' ? 
+        setLanguage('en') : setLanguage('zh') }>
+        {t('changeLocale')}
+      </Button>
     </View>
   );
 }

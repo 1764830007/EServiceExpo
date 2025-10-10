@@ -10,7 +10,7 @@ const UserCtx = defineStore("UserStore", {
   }),
   getters: {
     totalCont() {
-      return this.count * 2;
+      return this.count + 1;
     },
   },
   actions: {
@@ -22,7 +22,7 @@ const UserCtx = defineStore("UserStore", {
           name: "helux",
           email: "jun.o.li@accenture.cn",
         },
-        total: 1,
+        total: this.count + 1,
       });
       this.user = currentUser;
       this.count = total;

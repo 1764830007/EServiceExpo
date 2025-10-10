@@ -2,16 +2,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Link, useRouter } from 'expo-router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
-    ActivityIndicator,
-    EmitterSubscription,
-    Linking,
-    Modal,
-    NativeEventEmitter,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  EmitterSubscription,
+  Linking,
+  Modal,
+  NativeEventEmitter,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import { WebView, WebViewMessageEvent, WebViewNavigation } from 'react-native-webview';
@@ -31,11 +31,36 @@ export const loginEvents = new NativeEventEmitter();
  * CallBackInfo interface representing the response from SSO
  */
 interface CallBackInfo {
-    userLoginName: string;
-    token: string;
-    refreshToken: string;
-    lastTokenTime: string;
-    lastRefreshTokenTime: string;
+    UserLoginName: string;
+    Token: string;
+    RefreshToken: string;
+    TokenExpiration: string;
+    RefreshTokenExpiration: string;
+    // Additional properties from server response
+    CWSID?: string;
+    RedirectURL?: string | null;
+    WorkOrderCreate?: boolean;
+    WorkOrderAssign?: boolean;
+    WorkOrderExecute?: boolean;
+    WorkOrderView?: boolean;
+    WarrantyCardManagement?: boolean;
+    MenuEBook?: boolean;
+    MenuMachineEBook?: boolean;
+    MenuServiceManual?: boolean;
+    EquipmentManage?: boolean;
+    EquipmentUnbind?: boolean;
+    EbookPDFDownLoad?: boolean;
+    EquipmentBind?: boolean;
+    EquipmentBindRequestList?: boolean;
+    EquipmentEdit?: boolean;
+    MenuServiceManualSearch?: boolean;
+    UserType?: string;
+    IsCNUser?: boolean;
+    Email?: string | null;
+    PhoneNumber?: string | null;
+    HaveLoggedApp?: boolean;
+    NeedActive?: boolean;
+    IsVisitor?: boolean;
 }
 
 /**
@@ -50,7 +75,6 @@ interface CallBackInfo {
  * @returns {JSX.Element} The rendered Login component
  */
 export default function Login() {
-  const [emailOrPhone, setEmailOrPhone] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [showWebView, setShowWebView] = useState<boolean>(false);
   const [webviewLoading, setWebviewLoading] = useState<boolean>(false);
@@ -87,7 +111,7 @@ export default function Login() {
         setError('');
         const parsed = new URL(url);
         const token = parsed.searchParams.get('token');
-        const user = parsed.searchParams.get('user') || emailOrPhone;
+        const user: string = parsed.searchParams.get('user') ?? '';
         const errorMessage = parsed.searchParams.get('error');
         
         if (errorMessage) {
@@ -102,15 +126,18 @@ export default function Login() {
 
         // Create CallBackInfo from response
         const callBackInfo = {
-          userLoginName: user,
-          token,
-          refreshToken: parsed.searchParams.get('refresh_token') || '',
-          lastTokenTime: new Date().toISOString(),
-          lastRefreshTokenTime: new Date().toISOString(),
+          UserLoginName: user,
+          Token: token,
+          RefreshToken: parsed.searchParams.get('refresh_token') || '',
+          TokenExpiration: '3600', // Default to 1 hour if not provided
+          RefreshTokenExpiration: '2592000', // Default to 30 days if not provided
         };
 
         try {
           await authService.login(callBackInfo);
+          
+          // Set the login state in AuthContext
+          await login();
           
           // Check if PIN is needed
           const pinStored = await AsyncStorage.getItem('userPIN');
@@ -122,9 +149,9 @@ export default function Login() {
           // Notify other components about user change
           loginEvents.emit('userChanged', true);
 
-          // Close WebView and navigate
+          // Close WebView and navigate to index page
           setShowWebView(false);
-          router.replace('/(tabs)');
+          router.push('/');  // Navigate to the root index
           return true;
         } catch (loginError) {
           setError('Failed to save login credentials');
@@ -139,7 +166,7 @@ export default function Login() {
         setLoading(false);
       }
     },
-    [emailOrPhone, router],
+    [router],
   );
 
   // Handle login button press
@@ -196,6 +223,9 @@ export default function Login() {
           // Handle the login
           await authService.login(callBackInfo);
           
+          // Set the login state in AuthContext
+          await login();
+          
           // Verify token storage
           const storedToken = await AsyncStorage.getItem('authToken');
           console.log('[Storage] Token stored successfully:', storedToken ? 'Yes' : 'No');
@@ -204,9 +234,9 @@ export default function Login() {
           const storedRefreshToken = await AsyncStorage.getItem('refreshToken');
           console.log('[Storage] Refresh token stored:', storedRefreshToken ? 'Yes' : 'No');
           
-          console.log('[Navigation] Login successful, navigating to tabs');
+          console.log('[Navigation] Login successful, navigating to index');
           setShowWebView(false);
-          router.replace('/(tabs)');
+          router.push('/');
         } catch (error) {
           console.error('[Error] Login error:', error);
           setError('Failed to process login data');

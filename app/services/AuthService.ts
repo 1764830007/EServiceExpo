@@ -2,12 +2,36 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
 
 interface CallBackInfo {
-  userLoginName: string;
-  token: string;
-  refreshToken: string;
-  lastTokenTime: string;
-  lastRefreshTokenTime: string;
-  // add other fields from your CallBackinfo DTO
+  UserLoginName: string;
+  Token: string;
+  RefreshToken: string;
+  TokenExpiration: string;
+  RefreshTokenExpiration: string;
+  // Additional properties from server response
+  CWSID?: string;
+  RedirectURL?: string | null;
+  WorkOrderCreate?: boolean;
+  WorkOrderAssign?: boolean;
+  WorkOrderExecute?: boolean;
+  WorkOrderView?: boolean;
+  WarrantyCardManagement?: boolean;
+  MenuEBook?: boolean;
+  MenuMachineEBook?: boolean;
+  MenuServiceManual?: boolean;
+  EquipmentManage?: boolean;
+  EquipmentUnbind?: boolean;
+  EbookPDFDownLoad?: boolean;
+  EquipmentBind?: boolean;
+  EquipmentBindRequestList?: boolean;
+  EquipmentEdit?: boolean;
+  MenuServiceManualSearch?: boolean;
+  UserType?: string;
+  IsCNUser?: boolean;
+  Email?: string | null;
+  PhoneNumber?: string | null;
+  HaveLoggedApp?: boolean;
+  NeedActive?: boolean;
+  IsVisitor?: boolean;
 }
 
 interface UserProfile {
@@ -28,11 +52,11 @@ class AuthService {
   async login(callBackInfo: CallBackInfo): Promise<void> {
     try {
       // Store credentials
-      await AsyncStorage.setItem('authToken', callBackInfo.token);
-      await AsyncStorage.setItem('refreshToken', callBackInfo.refreshToken);
-      await AsyncStorage.setItem('userLoginName', callBackInfo.userLoginName);
-      await AsyncStorage.setItem('lastTokenTime', callBackInfo.lastTokenTime);
-      await AsyncStorage.setItem('lastRefreshTokenTime', callBackInfo.lastRefreshTokenTime);
+      await AsyncStorage.setItem('authToken', callBackInfo.Token);
+      await AsyncStorage.setItem('refreshToken', callBackInfo.RefreshToken);
+      await AsyncStorage.setItem('userLoginName', callBackInfo.UserLoginName);
+      await AsyncStorage.setItem('tokenExpiration', callBackInfo.TokenExpiration);
+      await AsyncStorage.setItem('refreshTokenExpiration', callBackInfo.RefreshTokenExpiration);
 
       // Initialize user profile and other services
       await this.initializeAfterLogin();

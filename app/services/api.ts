@@ -14,21 +14,55 @@ const api = axios.create({
 // Request interceptor for API calls
 api.interceptors.request.use(
   async (config) => {
+    // Add auth token
     const token = await AsyncStorage.getItem('authToken');
+    console.log('Auth Token:', token ? 'Exists' : 'Not found');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Construct full URL
+    const fullUrl = `${config.baseURL}${config.url}${
+      config.params ? `?${new URLSearchParams(config.params).toString()}` : ''
+    }`;
+
+    // Log request details
+    console.log('\n🌐 API Request:', {
+      method: config.method?.toUpperCase(),
+      url: fullUrl,
+      // headers: config.headers,
+      ...(config.data && { body: config.data }),
+      ...(config.params && { params: config.params })
+    });
+
     return config;
   },
   (error) => {
+    console.log('❌ Request Error:', error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor for API calls
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log successful response
+    console.log('\n✅ API Response:', {
+      status: response.status,
+      data: response.data
+    });
+    return response;
+  },
   async (error) => {
+    // Log error response
+    console.log('\n❌ API Error:', {
+      url: error.config?.baseURL + error.config?.url,
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message
+    });
+    
     const originalRequest = error.config;
 
     // If the error status is 401 and there is no originalRequest._retry flag,

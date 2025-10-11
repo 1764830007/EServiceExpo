@@ -20,7 +20,7 @@
      "id": "equipment-4",
     "title": "电子围栏",
     "icon": "heart-settings",
-    "link": "/location/RealLocation"
+    "link": "/fence/list"
 },
 {
      "id": "equipment-5",

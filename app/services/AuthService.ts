@@ -51,12 +51,20 @@ class AuthService {
 
   async login(callBackInfo: CallBackInfo): Promise<void> {
     try {
-      // Store credentials
-      await AsyncStorage.setItem('authToken', callBackInfo.Token);
-      await AsyncStorage.setItem('refreshToken', callBackInfo.RefreshToken);
-      await AsyncStorage.setItem('userLoginName', callBackInfo.UserLoginName);
-      await AsyncStorage.setItem('tokenExpiration', callBackInfo.TokenExpiration);
-      await AsyncStorage.setItem('refreshTokenExpiration', callBackInfo.RefreshTokenExpiration);
+      console.log('Storing auth credentials...', {
+        hasToken: !!callBackInfo.Token,
+        hasRefreshToken: !!callBackInfo.RefreshToken,
+        username: callBackInfo.UserLoginName
+      });
+      
+      // Store credentials with proper error handling
+      await Promise.all([
+        AsyncStorage.setItem('authToken', callBackInfo.Token).then(() => console.log('✅ Auth token stored')),
+        AsyncStorage.setItem('refreshToken', callBackInfo.RefreshToken).then(() => console.log('✅ Refresh token stored')),
+        AsyncStorage.setItem('userLoginName', callBackInfo.UserLoginName).then(() => console.log('✅ Username stored')),
+        AsyncStorage.setItem('tokenExpiration', callBackInfo.TokenExpiration).then(() => console.log('✅ Token expiration stored')),
+        AsyncStorage.setItem('refreshTokenExpiration', callBackInfo.RefreshTokenExpiration).then(() => console.log('✅ Refresh token expiration stored'))
+      ]);
 
       // Initialize user profile and other services
       await this.initializeAfterLogin();

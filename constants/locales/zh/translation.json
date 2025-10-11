@@ -8,8 +8,10 @@
   "equipment": {
     "management": "设备管理汇总",
     "list": "设备管理列表",
-    "statisticReport": "设备统计",
+    "statisticReport": "设备统计报告",
     "faultAlert": "设备故障报警",
-    "fence": "电子围栏"
+    "fence": "电子围栏",
+    "bindlist": "设备绑定申请列表",
+    "createBind": "创建绑定申请"
   }
 }

@@ -10,6 +10,8 @@
     "list": "Equipment List",
     "statisticReport": "Equipment Statistic Report",
     "faultAlert": "Equipment Fault Alert",
-    "fence": "Fence"
+    "fence": "Fence",
+     "bindlist": "Bind Request List",
+    "createBind": "Create Bind Request"
   }
 }

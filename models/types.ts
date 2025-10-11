@@ -10,3 +10,8 @@ export type Equipment = {
   device_type: string;
   device_status: string;
 }
+
+
+export type ActiveProps = {
+  active: boolean
+}

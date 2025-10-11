@@ -51,20 +51,52 @@ class AuthService {
 
   async login(callBackInfo: CallBackInfo): Promise<void> {
     try {
-      console.log('Storing auth credentials...', {
+      // Log the incoming data
+      console.log('📥 Received login data:', {
         hasToken: !!callBackInfo.Token,
+        tokenLength: callBackInfo.Token?.length || 0,
         hasRefreshToken: !!callBackInfo.RefreshToken,
-        username: callBackInfo.UserLoginName
+        refreshTokenLength: callBackInfo.RefreshToken?.length || 0,
+        username: callBackInfo.UserLoginName,
+        timestamp: new Date().toISOString()
       });
       
-      // Store credentials with proper error handling
-      await Promise.all([
-        AsyncStorage.setItem('authToken', callBackInfo.Token).then(() => console.log('✅ Auth token stored')),
-        AsyncStorage.setItem('refreshToken', callBackInfo.RefreshToken).then(() => console.log('✅ Refresh token stored')),
-        AsyncStorage.setItem('userLoginName', callBackInfo.UserLoginName).then(() => console.log('✅ Username stored')),
-        AsyncStorage.setItem('tokenExpiration', callBackInfo.TokenExpiration).then(() => console.log('✅ Token expiration stored')),
-        AsyncStorage.setItem('refreshTokenExpiration', callBackInfo.RefreshTokenExpiration).then(() => console.log('✅ Refresh token expiration stored'))
-      ]);
+      // Store each credential individually with verification
+      const storageOperations = [
+        { key: 'authToken', value: callBackInfo.Token },
+        { key: 'refreshToken', value: callBackInfo.RefreshToken },
+        { key: 'userLoginName', value: callBackInfo.UserLoginName },
+        { key: 'tokenExpiration', value: callBackInfo.TokenExpiration },
+        { key: 'refreshTokenExpiration', value: callBackInfo.RefreshTokenExpiration }
+      ];
+
+      for (const op of storageOperations) {
+        try {
+          await AsyncStorage.setItem(op.key, op.value);
+          // Verify storage
+          const stored = await AsyncStorage.getItem(op.key);
+          if (stored === op.value) {
+            console.log(`✅ ${op.key} stored and verified`);
+          } else {
+            console.error(`❌ ${op.key} verification failed - stored value doesn't match`);
+          }
+        } catch (storageError) {
+          console.error(`❌ Failed to store ${op.key}:`, storageError);
+          throw storageError;
+        }
+      }
+
+      // Double check auth token storage
+      const storedAuthToken = await AsyncStorage.getItem('authToken');
+      const storedRefreshToken = await AsyncStorage.getItem('refreshToken');
+      
+      console.log('🔍 Storage verification:', {
+        authTokenStored: !!storedAuthToken,
+        authTokenLength: storedAuthToken?.length || 0,
+        refreshTokenStored: !!storedRefreshToken,
+        refreshTokenLength: storedRefreshToken?.length || 0,
+        timestamp: new Date().toISOString()
+      });
 
       // Initialize user profile and other services
       await this.initializeAfterLogin();
@@ -109,6 +141,43 @@ class AuthService {
 
   async logOutPushNotification(): Promise<void> {
     // Implement push notification cleanup
+  }
+
+  async logout(): Promise<void> {
+    try {
+      console.log('🔄 Starting logout process...');
+      
+      // Get current storage state before logout
+      const beforeLogout = await AsyncStorage.getAllKeys();
+      console.log('📦 Storage before logout:', beforeLogout);
+
+      // Remove all auth-related items
+      const keysToRemove = [
+        'authToken',
+        'refreshToken',
+        'tokenExpiration',
+        'refreshTokenExpiration',
+        'userLoginName',
+        'isLoggedIn'
+      ];
+
+      await AsyncStorage.multiRemove(keysToRemove);
+
+      // Verify removal
+      const afterLogout = await AsyncStorage.getAllKeys();
+      console.log('📦 Storage after logout:', afterLogout);
+
+      // Check if any auth-related keys remain
+      const remainingAuthKeys = afterLogout.filter(key => keysToRemove.includes(key));
+      if (remainingAuthKeys.length > 0) {
+        console.warn('⚠️ Some auth keys were not removed:', remainingAuthKeys);
+      } else {
+        console.log('✅ All auth keys successfully removed');
+      }
+    } catch (error) {
+      console.error('❌ Logout error:', error);
+      throw error;
+    }
   }
 }
 

@@ -1,28 +1,36 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   Alert,
+  Dimensions,
+  Image,
   Modal,
   ScrollView,
   StyleSheet, Text,
   View
 } from 'react-native';
-import { Appbar, Avatar, Button, Icon, PaperProvider } from 'react-native-paper';
+import { Appbar, Avatar, Button, Icon, PaperProvider, useTheme } from 'react-native-paper';
 import { Tabs, TabScreen, TabsProvider } from 'react-native-paper-tabs';
+import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 import DeviceForm from '../DeviceForm';
 import SecondTab from '../SecondTab';
 import { api } from '../services/api';
 
 export default function Index() {
   const router = useRouter();
+  const { currentTheme } = useCustomTheme();
+  const theme = useTheme();
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [devices, setDevices] = useState<{name: string; type: string}[]>([]);
+  const [devices, setDevices] = useState<{ name: string; type: string }[]>([]);
   const [deviceCount, setDeviceCount] = useState(0);
   const [apiData, setApiData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const { width: screenWidth } = Dimensions.get('window');
 
   const handleAddDeviceClick = () => {
     setIsFormVisible(true);
@@ -43,7 +51,7 @@ export default function Index() {
     try {
       await AsyncStorage.removeItem('isLoggedIn');
       await AsyncStorage.removeItem('username');
-      
+
       // 使用 router 进行导航，兼容移动端和 web 端
       router.replace('/login');
     } catch (error) {
@@ -70,7 +78,7 @@ export default function Index() {
       const data = await api.get('services/app/EquipmentService/Equipments?limit=10&offset=0');
       console.log('API响应数据:', data);
       setApiData(data);
-      
+
       // 根据API响应结构正确获取设备数量
       const deviceCount = Array.isArray(data) ? data.length : (data as any)?.result?.length || 0;
       Alert.alert('API测试成功', `成功获取设备列表，共${deviceCount}台设备`);
@@ -103,37 +111,105 @@ export default function Index() {
     }
   };
 
+  // 轮播图数据 - 使用图片
+  const carouselData = [
+    {
+      id: 1,
+      image: require('../../assets/images/03-1.jpg'),
+    },
+    {
+      id: 2,
+      image: require('../../assets/images/03-3.jpg'),
+    },
+    {
+      id: 3,
+      image: require('../../assets/images/03-4.jpg'),
+    },
+  ];
+
+  // 轮播图滚动处理
+  const handleScroll = (event: any) => {
+    const contentOffsetX = event.nativeEvent.contentOffset.x;
+    const currentIndex = Math.round(contentOffsetX / screenWidth);
+    setCurrentSlide(currentIndex);
+  };
+
+  // 跳转到指定轮播图
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+    scrollViewRef.current?.scrollTo({ x: index * screenWidth, animated: true });
+  };
+
   return (
     <PaperProvider>
-    <ScrollView>
-      <View style={styles.container}>
-        <Appbar.Header style={styles.bar}>
-          {/* 占位 */}
-          <Appbar.Content
-            title="袁满华"
-          />
-          <Appbar.Action icon="headset" style={styles.barIcon} onPress={() => { }} />
-          <Appbar.Action icon="bell" style={styles.barIcon} onPress={() => { }} />
+      <ScrollView>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+          <Appbar.Header style={[styles.bar, { backgroundColor: currentTheme === 'dark' ? '#333' : '#fff' }]}>
+            <Appbar.Content
+              title="袁满华"
+              titleStyle={{
+                color: currentTheme === 'dark' ? '#fff' : '#000'  // 暗黑模式文字为白色，明亮模式为黑色
+              }}
+            />
+            <Appbar.Action icon="headset" style={styles.barIcon} onPress={() => { }} />
+            <Appbar.Action icon="bell" style={styles.barIcon} onPress={() => { }} />
+          </Appbar.Header>
 
-        </Appbar.Header>
-        <LinearGradient
-          colors={['#D2B48C', '#F5DEB3']} // 浅棕色到浅黄色
-          start={{ x: 0, y: 0 }}           // 从左开始
-          end={{ x: 1, y: 0 }}             // 到右结束
-          style={[styles.addDevice, { padding: 20, justifyContent: 'space-between' }]}
-        >
-          {/* 你的现有内容 */}
-          <View>
-            <Text>设备总数</Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          {/* 轮播图模块 */}
+          <View style={[styles.carouselContainer, { backgroundColor: theme.colors.surface }]}>
+            <ScrollView
+              ref={scrollViewRef}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              onScroll={handleScroll}
+              scrollEventThrottle={16}
+              style={styles.carouselScrollView}
+            >
+              {carouselData.map((item, index) => (
+                <View key={item.id} style={[styles.carouselSlide, { width: screenWidth }]}>
+                  <Image
+                    source={item.image}
+                    style={styles.carouselImage}
+                    resizeMode="cover"
+                  />
+                </View>
+              ))}
+            </ScrollView>
+
+            {/* 指示器 */}
+            <View style={styles.indicatorContainer}>
+              {carouselData.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.indicator,
+                    currentSlide === index ? styles.activeIndicator : styles.inactiveIndicator
+                  ]}
+                  onTouchEnd={() => goToSlide(index)}
+                />
+              ))}
+            </View>
+          </View>
+
+          <LinearGradient
+            colors={['#D2B48C', '#F5DEB3']} // 浅棕色到浅黄色
+            start={{ x: 0, y: 0 }}           // 从左开始
+            end={{ x: 1, y: 0 }}             // 到右结束
+            style={[styles.addDevice, { padding: 20, justifyContent: 'space-between' }]}
+          >
+            {/* 你的现有内容 */}
+            <View>
+              <Text>设备总数</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {/* 显示更新后的设备数量 */}
                 <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{deviceCount}</Text>
                 <Text style={{ marginLeft: 15 }}>台</Text>
                 <Icon source="chevron-right" size={20} color="#999" />
+              </View>
             </View>
-          </View>
-          <View>
-            <Button
+            <View>
+              <Button
                 onPress={handleAddDeviceClick} // 修改为打开表单
                 mode="contained"
                 style={styles.loginButton}
@@ -142,181 +218,201 @@ export default function Index() {
               >
                 添加设备
               </Button>
-          </View>
-        </LinearGradient>
-
-        <View style={[styles.addDevice, { padding: 20 }]}>
-          <View style={styles.rowContainer}>
-            <View style={styles.centeredItem}>
-              <Text>在线设备</Text>
-              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>0</Text>
             </View>
-            <View style={styles.centeredItem}>
-              <Text>离线设备</Text>
-              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>0</Text>
-            </View>
-            <View style={styles.centeredItem}>
-              <Text>故障报警</Text>
-              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>0</Text>
-            </View>
-            <View style={styles.centeredItem}>
-              <Text>执行中工单</Text>
-              <Text style={{ fontSize: 20, fontWeight: 'bold' }}>0</Text>
-            </View>
-          </View>
-        </View>
+          </LinearGradient>
 
-        {/* API测试区域 */}
-        <View style={[styles.addDevice, { padding: 20, marginTop: 20 }]}>
-          <Text style={styles.sectionTitle}>API测试</Text>
-          
-          <View style={styles.apiButtonContainer}>
-            <Button
-              onPress={saveToken}
-              mode="contained"
-              style={styles.apiButton}
-              buttonColor="green"
-            >
-              保存Token
-            </Button>
-            
-            <Button
-              onPress={handleGetEquipments}
-              mode="contained"
-              style={styles.apiButton}
-              loading={loading}
-              disabled={loading}
-            >
-              获取设备列表
-            </Button>
-          </View>
-
-          <View style={styles.apiButtonContainer}>
-            <Button
-              onPress={handlePostApiCall}
-              mode="outlined"
-              style={styles.apiButton}
-              loading={loading}
-              disabled={loading}
-            >
-              POST请求测试
-            </Button>
-          </View>
-
-          {error && (
-            <View style={styles.errorContainer}>
-              <Text style={styles.errorText}>错误: {error}</Text>
-            </View>
-          )}
-
-          {apiData && (
-            <View style={styles.apiResultContainer}>
-              <Text style={styles.resultTitle}>API响应数据:</Text>
-              <Text style={styles.resultText}>
-                {JSON.stringify(apiData, null, 2)}
-              </Text>
-            </View>
-          )}
-        </View>
-        <View style={{
-          marginTop: 20,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          paddingHorizontal: 16
-        }}>
-          {/* 项目1 */}
-          <View style={{ alignItems: 'center' }}>
-            <Avatar.Icon size={40} icon="folder" style={{ backgroundColor: 'white' }} />
-            <Text>电子图册</Text>
-          </View>
-
-          {/* 项目2 */}
-          <View style={{ alignItems: 'center' }}>
-            <Avatar.Icon size={40} icon="folder" style={{ backgroundColor: 'white' }} />
-            <Text>服务手册</Text>
-          </View>
-
-          {/* 项目3 */}
-          <View style={{ alignItems: 'center' }}>
-            <Avatar.Icon size={40} icon="folder" style={{ backgroundColor: 'white' }} />
-            <Text>服务工单</Text>
-          </View>
-
-          {/* 项目4 */}
-          <View style={{ alignItems: 'center' }}>
-            <Avatar.Icon size={40} icon="folder" style={{ backgroundColor: 'white' }} />
-            <Text>保修信息</Text>
-          </View>
-
-          {/* 项目5 */}
-          <View style={{ alignItems: 'center' }}>
-            <Avatar.Icon size={40} icon="folder" style={{ backgroundColor: 'white' }} />
-            <Text>我的请求</Text>
-          </View>
-        </View>
-        <View style={{ height: 800, width:'95%',alignSelf: 'center', marginTop:20, backgroundColor: 'white'}}>
-        <TabsProvider defaultIndex={0} >
-          <Tabs
-            style={styles.tabsContainer}
-            tabLabelStyle={styles.tabLabel}
-            theme={{
-              colors: {
-                primary: 'blue' // 设置指示器颜色
-              }
-            }}
-          >
-            {/* 第一个标签页 */}
-            <TabScreen label="设备列表">
-              <View>
-                <SecondTab/>
+          <View style={[styles.addDevice, { backgroundColor: theme.colors.surface, padding: 20, marginTop: 20 }]}>
+            <View style={[styles.rowContainer, {
+              backgroundColor: theme.colors.surface,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              width: '100%'  // 确保容器占满宽度
+            }]}>
+              <View style={[styles.centeredItem, {
+                backgroundColor: theme.colors.surface,
+                flex: 1,      // 每个项平均分配空间
+                padding: 8    // 增加内边距避免内容过挤
+              }]}>
+                <Text style={{ color: theme.colors.onSurface }}>在线设备</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>0</Text>
               </View>
-            </TabScreen>
-
-            {/* 第二个标签页 */}
-            <TabScreen label="设备分组">
-              <View style={styles.tabContent}>
-                <Text>这里是设备分组内容</Text>
+              <View style={[styles.centeredItem, { flex: 1, padding: 8 }]}>
+                <Text style={{ color: theme.colors.onSurface }}>离线设备</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>0</Text>
               </View>
-            </TabScreen>
-
-            {/* 第三个标签页 */}
-            <TabScreen label="设备统计">
-              <View style={styles.tabContent}>
-                <Text>这里是设备统计数据</Text>
+              <View style={[styles.centeredItem, { flex: 1, padding: 8 }]}>
+                <Text style={{ color: theme.colors.onSurface }}>故障报警</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>0</Text>
               </View>
-            </TabScreen>
+              <View style={[styles.centeredItem, { flex: 1, padding: 8 }]}>
+                <Text style={{ color: theme.colors.onSurface }}>执行中工单</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>0</Text>
+              </View>
+            </View>
+          </View>
 
-            <TabScreen label="我的设备">
-            <View style={styles.tabContent}>
-              {devices.length > 0 ? (
-                devices.map((device, index) => (
-                  <View key={index} style={styles.deviceItem}>
-                    <Text>{device.name} - {device.type}</Text>
+          {/* API测试区域 */}
+          <View style={[styles.addDevice, { backgroundColor: theme.colors.surface, padding: 20, marginTop: 20 }]}>
+            <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>API测试</Text>
+
+            <View style={styles.apiButtonContainer}>
+              <Button
+                onPress={saveToken}
+                mode="contained"
+                style={styles.apiButton}
+                buttonColor="green"
+              >
+                保存Token
+              </Button>
+
+              <Button
+                onPress={handleGetEquipments}
+                mode="contained"
+                style={styles.apiButton}
+                loading={loading}
+                disabled={loading}
+              >
+                获取设备列表
+              </Button>
+            </View>
+
+            <View style={styles.apiButtonContainer}>
+              <Button
+                onPress={handlePostApiCall}
+                mode="outlined"
+                style={styles.apiButton}
+                loading={loading}
+                disabled={loading}
+              >
+                POST请求测试
+              </Button>
+            </View>
+
+            {error && (
+              <View style={[styles.errorContainer, { backgroundColor: currentTheme === 'dark' ? '#ff5252' : '#ffebee' }]}>
+                <Text style={[styles.errorText, { color: currentTheme === 'dark' ? '#fff' : '#c62828' }]}>错误: {error}</Text>
+              </View>
+            )}
+
+            {apiData && (
+              <View style={[styles.apiResultContainer, {
+                backgroundColor: currentTheme === 'dark' ? '#424242' : '#f5f5f5',
+                borderColor: currentTheme === 'dark' ? '#616161' : '#e0e0e0'
+              }]}>
+                <Text style={[styles.resultTitle, { color: theme.colors.onSurface }]}>API响应数据:</Text>
+                <Text style={[styles.resultText, { color: currentTheme === 'dark' ? '#bdbdbd' : '#666' }]}>
+                  {JSON.stringify(apiData, null, 2)}
+                </Text>
+              </View>
+            )}
+          </View>
+          <View style={{
+            marginTop: 20,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16
+          }}>
+            {/* 项目1 */}
+            <View style={{ alignItems: 'center' }}>
+              <Avatar.Icon size={40} icon="folder" style={{ backgroundColor: currentTheme === 'dark' ? '#424242' : 'white' }} />
+              <Text style={{ color: theme.colors.onSurface, marginTop: 4 }}>电子图册</Text>
+            </View>
+
+            {/* 项目2 */}
+            <View style={{ alignItems: 'center' }}>
+              <Avatar.Icon size={40} icon="folder" style={{ backgroundColor: currentTheme === 'dark' ? '#424242' : 'white' }} />
+              <Text style={{ color: theme.colors.onSurface, marginTop: 4 }}>服务手册</Text>
+            </View>
+
+            {/* 项目3 */}
+            <View style={{ alignItems: 'center' }}>
+              <Avatar.Icon size={40} icon="folder" style={{ backgroundColor: currentTheme === 'dark' ? '#424242' : 'white' }} />
+              <Text style={{ color: theme.colors.onSurface, marginTop: 4 }}>服务工单</Text>
+            </View>
+
+            {/* 项目4 */}
+            <View style={{ alignItems: 'center' }}>
+              <Avatar.Icon size={40} icon="folder" style={{ backgroundColor: currentTheme === 'dark' ? '#424242' : 'white' }} />
+              <Text style={{ color: theme.colors.onSurface, marginTop: 4 }}>保修信息</Text>
+            </View>
+
+            {/* 项目5 */}
+            <View style={{ alignItems: 'center' }}>
+              <Avatar.Icon size={40} icon="folder" style={{ backgroundColor: currentTheme === 'dark' ? '#424242' : 'white' }} />
+              <Text style={{ color: theme.colors.onSurface, marginTop: 4 }}>我的请求</Text>
+            </View>
+          </View>
+          <View style={{
+            height: 800,
+            width: '95%',
+            alignSelf: 'center',
+            marginTop: 20,
+            backgroundColor: theme.colors.surface
+          }}>
+            <TabsProvider defaultIndex={0} >
+              <Tabs
+                style={{ ...styles.tabsContainer, backgroundColor: theme.colors.surface }}
+                tabLabelStyle={{ ...styles.tabLabel, color: theme.colors.onSurface }}
+                theme={{
+                  colors: {
+                    primary: currentTheme === 'dark' ? '#90caf9' : 'blue' // 深色模式使用浅蓝色指示器
+                  }
+                }}
+              >
+                {/* 第一个标签页 */}
+                <TabScreen label="设备列表">
+                  <View>
+                    <SecondTab />
                   </View>
-                ))
-              ) : (
-                <Text>暂无设备，请添加设备</Text>
-              )}
-            </View>
-          </TabScreen>
-          </Tabs>
-        </TabsProvider>
+                </TabScreen>
+
+                {/* 第二个标签页 */}
+                <TabScreen label="设备分组">
+                  <View style={[styles.tabContent, { backgroundColor: theme.colors.background }]}>
+                    <Text style={{ color: theme.colors.onSurface }}>这里是设备分组内容</Text>
+                  </View>
+                </TabScreen>
+
+                {/* 第三个标签页 */}
+                <TabScreen label="设备统计">
+                  <View style={[styles.tabContent, { backgroundColor: theme.colors.background }]}>
+                    <Text style={{ color: theme.colors.onSurface }}>这里是设备统计数据</Text>
+                  </View>
+                </TabScreen>
+
+                <TabScreen label="我的设备">
+                  <View style={[styles.tabContent, { backgroundColor: theme.colors.background }]}>
+                    {devices.length > 0 ? (
+                      devices.map((device, index) => (
+                        <View key={index} style={[styles.deviceItem, {
+                          borderBottomColor: currentTheme === 'dark' ? '#424242' : '#eee'
+                        }]}>
+                          <Text style={{ color: theme.colors.onSurface }}>{device.name} - {device.type}</Text>
+                        </View>
+                      ))
+                    ) : (
+                      <Text style={{ color: theme.colors.onSurface }}>暂无设备，请添加设备</Text>
+                    )}
+                  </View>
+                </TabScreen>
+              </Tabs>
+            </TabsProvider>
+          </View>
         </View>
-      </View>
       </ScrollView>
       <Modal
+        visible={isFormVisible}
+        animationType="slide"
+        transparent={true}
+      >
+        <View style={styles.modalOverlay}>
+          <DeviceForm
             visible={isFormVisible}
-            animationType="slide"
-            transparent={true}
-          >
-            <View style={styles.modalOverlay}>
-              <DeviceForm
-                visible={isFormVisible}
-                onClose={handleCloseForm}
-                onAddDevice={handleAddDevice} // 传递回调函数给子组件
-              />
-            </View>
-          </Modal>
+            onClose={handleCloseForm}
+            onAddDevice={handleAddDevice} // 传递回调函数给子组件
+          />
+        </View>
+      </Modal>
     </PaperProvider>
   );
 }
@@ -388,35 +484,31 @@ const styles = StyleSheet.create({
     marginTop: 0,
     paddingVertical: 8,
   },
-    tabsContainer: {
-      backgroundColor: '#fff',
-      elevation: 2,
-    },
-    tabLabel: {
-      fontSize: 14,
-      fontWeight: 'bold',
-      color: '#333',
-    },
-    // 选中状态样式
-    tabActive: {
-      backgroundColor: '#1E90FF', // 蓝色背景
-      borderRadius: 4,
-    },
-    // 未选中状态样式
-    tabInactive: {
-      backgroundColor: 'transparent',
-    },
-    indicator: {
-      backgroundColor: 'white', // 白色指示器(与填充色形成对比)
-      height: 3,
-    },
-    tabContent: {
-      flex: 1,
-      padding: 20,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    modalOverlay: {
+  tabsContainer: {
+    backgroundColor: '#fff',
+    elevation: 2,
+  },
+  tabLabel: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  // 选中状态样式
+  tabActive: {
+    backgroundColor: '#1E90FF', // 蓝色背景
+    borderRadius: 4,
+  },
+  // 未选中状态样式
+  tabInactive: {
+    backgroundColor: 'transparent',
+  },
+  tabContent: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalOverlay: {
     flex: 1,
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -468,5 +560,43 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     fontFamily: 'monospace',
+  },
+  // 轮播图样式
+  carouselContainer: {
+    height: 160,
+    backgroundColor: '#fff',
+    marginBottom: 10,
+  },
+  carouselScrollView: {
+    flex: 1,
+  },
+  carouselSlide: {
+    height: 160,
+  },
+  carouselImage: {
+    width: '100%',
+    height: '100%',
+  },
+  indicatorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  activeIndicator: {
+    backgroundColor: '#fff',
+    width: 16,
+  },
+  inactiveIndicator: {
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
   }
 });

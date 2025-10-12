@@ -1,13 +1,16 @@
 import { useLocalization } from '@/hooks/locales/LanguageContext';
 import { useRouter } from 'expo-router';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Appbar, Button, Divider, Icon, Text } from 'react-native-paper';
+import { Appbar, Divider, Icon, Text, useTheme } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 export default function SettingScreen() {
-  const {locale, setLanguage, t } = useLocalization();
-
   const router = useRouter();
   const { logout } = useAuth();
+  const { themeMode, currentTheme } = useCustomTheme();
+  const theme = useTheme();
+  const { locale, setLanguage, t } = useLocalization();
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -16,164 +19,190 @@ export default function SettingScreen() {
     }
   };
 
+  // 获取当前主题显示文本
+  const getThemeDisplayText = () => {
+    if (themeMode === 'system') {
+      return t('setting.system');
+    } else {
+      return currentTheme === 'dark' ? t('setting.deepcolor') : t('setting.lightcolor');
+    }
+  };
+
   return (
-    <View style={styles.container}>
-      <Appbar.Header style={styles.bar}>
-        {/* 占位 */}
-        <Appbar.Content
-          title=""
-        />
-        <Appbar.Action icon="bell" style={styles.barIcon} onPress={() => { }} />
+    <View style={[styles.container, { backgroundColor: theme.colors.surfaceVariant }]}>
+      {/* 页面内容容器 */}
+      <View style={styles.contentContainer}>
+        <Appbar.Header style={[styles.bar, { backgroundColor: theme.colors.surface }]}>
+          <Appbar.Content title="" />
+          <Appbar.Action
+            icon="bell"
+            style={[styles.barIcon, { backgroundColor: theme.colors.surface }]}
+            onPress={() => { }}
+          />
+        </Appbar.Header>
 
-      </Appbar.Header>
-      <View style={styles.subtitleContainer}>
-        <Text style={styles.subtitleText}>袁满华</Text>
-        <View style={[styles.name, { marginTop: 10 }]}>
-         <Icon source="camera" size={15} />
-        <Text style={[styles.subtitleText,{ marginLeft:10}]}>EC_testj</Text>
+        <View style={[styles.subtitleContainer, { backgroundColor: theme.colors.surface }]}>
+          <Text style={[styles.subtitleText, { color: theme.colors.onSurface, fontSize: 20 }]}>李岳叶</Text>
+          <View style={[styles.name, { marginTop: 20 }]}>
+            <Icon source="account" size={15} color={theme.colors.onSurface} />
+            <Text style={[styles.subtitleText, { marginLeft: 10, color: theme.colors.onSurface }]}>涉县威远机械设备有限公司</Text>
+          </View>
+        </View>
+        <View style={[styles.profileList, { marginTop: 10, backgroundColor: theme.colors.surface }]}>
+          <View style={styles.leftContent}>
+            <Icon source="shield-account" size={20} color={theme.colors.onSurface} />
+            <Text style={[styles.profileListContent, { color: theme.colors.onSurface }]}>{t('setting.personInfo')}</Text>
+          </View>
+          <Icon
+            source="chevron-right"
+            size={20}
+            color={theme.colors.outline}
+          />
         </View>
 
-      </View>
-      <View style={[styles.profileList, { marginTop: 10 }]}>
-        <View style={styles.leftContent}>
-          <Icon source="camera" size={20} />
-          <Text style={styles.profileListContent}>个人资料</Text>
-        </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
+        
 
-      <View style={[styles.profileList, { marginTop: 10 }]}>
-        <View style={styles.leftContent}>
-          <Icon source="camera" size={20} />
-          <Text style={styles.profileListContent}>深色模式</Text>
-        </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
+        <TouchableOpacity
+          style={[styles.profileList, { marginTop: 10, backgroundColor: theme.colors.surface }]}
+          onPress={() => router.push('/dark-mode')}
+        >
+          <View style={styles.leftContent}>
+            <Icon source="moon-waxing-crescent" size={20} color={theme.colors.onSurface} />
+            <Text style={[styles.profileListContent, { color: theme.colors.onSurface }]}>{t('setting.deepcolor')}</Text>
+          </View>
+          <View style={styles.rightContent}>
+            <Text style={[styles.textRight, { color: theme.colors.outline }]}>{getThemeDisplayText()}</Text>
+            <Icon
+              source="chevron-right"
+              size={20}
+              color={theme.colors.outline}
+            />
+          </View>
+        </TouchableOpacity>
 
-      <View style={[styles.profileList, { marginTop: 10 }]}>
-        <View style={styles.leftContent}>
-          <Icon source="camera" size={20} />
-          <Text style={styles.profileListContent}>隐私公告</Text>
+        <View style={[styles.profileList, { marginTop: 10, backgroundColor: theme.colors.surface }]}>
+          <View style={styles.leftContent}>
+            <Icon source="shield-account" size={20} color={theme.colors.onSurface} />
+            <Text style={[styles.profileListContent, { color: theme.colors.onSurface }]}>{t('setting.PrivacyNotice')}</Text>
+          </View>
+          <Icon
+            source="chevron-right"
+            size={20}
+            color={theme.colors.outline}
+          />
         </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
-      <Divider bold={true} style={styles.divider}/>
-      <View style={[styles.profileList]}>
-        <View style={styles.leftContent}>
-          <Icon source="camera" size={20} />
-          <Text style={styles.profileListContent}>联系我们</Text>
-        </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
-      <Divider bold={true} style={styles.divider}/>
-      <View style={[styles.profileList]}>
-        <View style={styles.leftContent}>
-          <Icon source="camera" size={20} />
-          <Text style={styles.profileListContent}>关于</Text>
-        </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
-      <Divider bold={true} style={styles.divider}/>
-      <View style={[styles.profileList]}>
-        <View style={styles.leftContent}>
-          <Icon source="camera" size={20} />
-          <Text style={styles.profileListContent}>意见反馈</Text>
-        </View>
-        <Icon
-          source="chevron-right"  // 向右箭头图标
-          size={20}
-          color="#999"            // 灰色箭头
-        />
-      </View>
 
-      {/* 注销按钮 */}
-      <TouchableOpacity 
-        style={styles.logoutButton}
-        onPress={handleLogout}
-      >
-        <Text style={styles.logoutText}>退出登录</Text>
-      </TouchableOpacity>
- 
-      <Button mode='contained' onPress={() => locale === 'zh' ? 
-        setLanguage('en') : setLanguage('zh') }>
-        {t('changeLocale')}
-      </Button>
+        <Divider bold={true} style={styles.divider} />
+
+        <View style={[styles.profileList, { backgroundColor: theme.colors.surface }]}>
+          <View style={styles.leftContent}>
+            <Icon source="alert-circle" size={20} color={theme.colors.onSurface} />
+            <Text style={[styles.profileListContent, { color: theme.colors.onSurface }]}>{t('setting.contractUs')}</Text>
+          </View>
+          <Icon
+            source="chevron-right"
+            size={20}
+            color={theme.colors.outline}
+          />
+        </View>
+
+        <Divider bold={true} style={styles.divider} />
+
+        <View style={[styles.profileList, { backgroundColor: theme.colors.surface }]}>
+          <View style={styles.leftContent}>
+            <Icon source="read" size={20} color={theme.colors.onSurface} />
+            <Text style={[styles.profileListContent, { color: theme.colors.onSurface }]}>{t('setting.about')}</Text>
+          </View>
+          <Icon
+            source="chevron-right"
+            size={20}
+            color={theme.colors.outline}
+          />
+        </View>
+
+        <View style={{ padding: 20, marginTop: 20 }}>
+        <TouchableOpacity
+          style={[styles.logoutButton, { backgroundColor: '#37589eff' }]}
+          onPress={() => locale === 'zh' ?
+        setLanguage('en') : setLanguage('zh')}
+        >
+          <Text style={styles.logoutText}>{t('changeLocale')}</Text>
+        </TouchableOpacity>
+      </View>
+      </View>
+      
+     
+      {/* 固定在底部的注销按钮 */}
+      <View style={styles.logoutContainer}>
+        <TouchableOpacity
+          style={[styles.logoutButton, { backgroundColor: '#37589eff' }]}
+          onPress={handleLogout}
+        >
+          <Text style={styles.logoutText}>{t('setting.logout')}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#E8E8E8',
-    height: '100%',
+    flex: 1,
+    position: 'relative', // 使子元素可以使用绝对定位
   },
-  bar: {
-    backgroundColor: '#274D7C',
+  contentContainer: {
+    flex: 1, // 让内容区域占据剩余空间
   },
-  barIcon: {
-    backgroundColor: 'white',
-  },
+  bar: {},
+  barIcon: {},
   subtitleContainer: {
-    backgroundColor: '#274D7C', // 与 AppBar 同色
-    padding: 10,            // 内边距
+    padding: 10,
     alignItems: 'flex-start',
   },
   subtitleText: {
-    color: 'white',         // 文字颜色（与背景对比）
     fontSize: 14,
   },
   name: {
-    flexDirection: 'row',    // 横向排列
-    alignItems: 'center',    // 垂直居中
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-
   profileList: {
-    backgroundColor: '#FFFFFF',
-    flexDirection: 'row',    // 横向排列
-    alignItems: 'center',    // 垂直居中
-    justifyContent: 'space-between', // 左右两端对齐
-    paddingVertical: 12,     // 垂直内边距
-    paddingHorizontal: 16,   // 水平内边距
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
   },
-
   leftContent: {
-    flexDirection: 'row',    // 图标和文字横向排列
-    alignItems: 'center',    // 垂直居中
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   profileListContent: {
-    marginLeft: 12,          // 文字与左边图标的间距
+    marginLeft: 12,
     fontSize: 16,
   },
+  rightContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textRight: {
+    fontSize: 14,
+  },
   divider: {
-      marginLeft: 48,  // 20(icon) + 12(margin) + 16(padding)
+    marginLeft: 48,  // 20(icon) + 12(margin) + 16(padding)
+  },
+  logoutContainer: {
+    ...StyleSheet.absoluteFillObject, // 填充整个父容器
+    justifyContent: 'flex-end', // 垂直方向靠底部
+    padding: 20, // 底部和左右的间距
+    pointerEvents: 'none', // 让容器不拦截点击事件，避免影响底部内容
   },
   logoutButton: {
-    backgroundColor: '#ff3b30',
-    margin: 20,
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
-    marginTop: 30,
+    width: '100%', // 按钮宽度占满容器
+    pointerEvents: 'auto', // 恢复按钮的点击事件
   },
   logoutText: {
     color: 'white',

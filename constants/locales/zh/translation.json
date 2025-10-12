@@ -5,6 +5,17 @@
     "setting": "设置"
   },
   "changeLocale": "修改语言",
+  "setting": {
+    "personInfo": "个人资料",
+    "email": "邮箱",
+    "deepcolor": "深色模式",
+    "lightcolor": "明亮模式",
+    "system": "跟随系统",
+    "logout": "退出登录",
+    "PrivacyNotice": "隐私公告",
+    "contractUs": "联系我们",
+    "about": "关于"
+  },
   "equipment": {
     "management": "设备管理汇总",
     "list": "设备管理列表",

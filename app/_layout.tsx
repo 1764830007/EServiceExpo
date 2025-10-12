@@ -1,16 +1,11 @@
 import { useColorScheme } from "@/hooks/use-color-scheme";
-import {
-  DarkTheme,
-  DefaultTheme,
-  ThemeProvider,
-} from "@react-navigation/native";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 // import 'react-native-reanimated';
 import LanguageProvider from "@/hooks/locales/LanguageContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-
+import { ThemeProvider } from './contexts/ThemeContext';
 export const unstable_settings = {
   anchor: "(tabs)",
 };
@@ -49,12 +44,13 @@ export default function RootLayout() {
 
   return (
     <LanguageProvider>
-      <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+      <ThemeProvider>
         <AuthProvider>
           <RouteProtection>
             <Stack screenOptions={{animation: 'fade'}}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="devices/equipment-list" options={{ headerShown: false }} />
+              <Stack.Screen name="dark-mode" options={{ headerShown: false }} />
             </Stack>
             <StatusBar style="auto" />
           </RouteProtection>

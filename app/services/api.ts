@@ -2,7 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios, { AxiosInstance } from 'axios';
 
-const API_BASE_URL = 'https://dcpqa.semdcp.com/api/';
+const API_BASE_URL = 'https://dcpqa.semdcp.com/ecapi/api/';
 
 // 创建axios实例
 const apiClient: AxiosInstance = axios.create({
@@ -19,7 +19,10 @@ const acquireToken = async (): Promise<string> => {
   try {
     const token = await AsyncStorage.getItem('authToken');
     if (!token) {
-      throw new Error('No token found');
+      // 临时使用提供的token
+      const tempToken = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjREWFlYTk9BbThmeC0zU2w2UUxEbTlFbGZ2R0c3amd3U0ZheDdyOWVLY2siLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE3NjAzMzAzNDYsIm5iZiI6MTc2MDMyNjc0NiwidmVyIjoiMS4wIiwiaXNzIjoiaHR0cHM6Ly9jd3Nsb2dpbi5iMmNsb2dpbi5jb20vdGZwLzRmMGYxOWQwLWY0NGMtNGEwMy1iOGNiLWFiMzI3YmQyYjEyYi9iMmNfMWFfcDNfdjFfc2lnbmluX25vbnByb2QvdjIuMC8iLCJzdWIiOiI0NGUxZjJjZC1iZWI3LTQ2Y2ItODkxNC1jN2QyYTY1MjI3MmUiLCJhdWQiOiI0NjQzNGNlMS0wZWJmLTRjYTgtYWViOS1hOGRjMjNjNDExMjAiLCJub25jZSI6ImRlZmF1bHROb25jZSIsImlhdCI6MTc2MDMyNjc0NiwiYXV0aF90aW1lIjoxNzYwMzI2NzQ0LCJjbGllbnRfaWQiOiI0NjQzNGNlMS0wZWJmLTRjYTgtYWViOS1hOGRjMjNjNDExMjAiLCJjYXRhZmx0bmNsYXNzIjoiQ1VTVCIsImNhdGxvZ2luaWQiOiJwaGlsaXN0ZXN0MSIsImNhdHJlY2lkIjoiU0FQLTAwMDAwNkMyIiwiY2F0YWZsdG5jb2RlIjoiMDA0IiwidGlkIjoiNGYwZjE5ZDAtZjQ0Yy00YTAzLWI4Y2ItYWIzMjdiZDJiMTJiIiwidGZwIjoiQjJDXzFBX1AzX1YxX1NpZ25Jbl9Ob25Qcm9kIiwibGFuZ3VhZ2UiOiJ6aC1IYW5zIn0.f-FBmCgTq8AOqFq321XGMg_HCVUcsMSf3iNsWMoEQuv6e1jljbSwHyGlUc7aOByK6CuXyvmEuF_SKdr7QzQGjmEDRkp7nS4CCt1RSonqs-At6S12mwIYlh9ba7SjsDdN24PxMBUELFjmkhbHVBC2tnWeJrx2YP_Qd7z93TMuVgvgPHEBIVAeh7O4DfYq-RxBbInrEP6hHhfYei87n_L6XtYhck2a08ehNpqkpVC0Dqzsz8rvtPqedArglKxgbEGhumzLcvw0jsxe0obhh8zq36ZNMLSRzSKkYUmWfvEVEU-iZbKEj1FFmJBg6wohGikfKvKndPoallWzys5ZKNyjEQ';
+      console.log('使用临时token');
+      return tempToken;
     }
     return token;
   } catch (error) {

@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Dimensions,
@@ -31,6 +31,38 @@ export default function Index() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollViewRef = useRef<ScrollView>(null);
   const { width: screenWidth } = Dimensions.get('window');
+  const [dashboardData, setDashboardData] = useState({
+    all: 0,
+    online: 0,
+    others: 0,
+    faultAlert: 0,
+    executingService: 0
+  });
+
+  // 获取数字仪表板数据
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await api.get('services/app/EquipmentService/GetDigitalDashborad');
+      console.log('仪表板数据:', data);
+      
+      if (data && data.result) {
+        setDashboardData(data.result);
+        setDeviceCount(data.result.all);
+      }
+    } catch (err: any) {
+      setError(err.message || '获取仪表板数据失败');
+      console.error('API请求失败:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 页面加载时获取数据
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
 
   const handleAddDeviceClick = () => {
     setIsFormVisible(true);
@@ -74,8 +106,11 @@ export default function Index() {
     setLoading(true);
     setError(null);
     try {
-      // 直接使用API地址调用，并使用 Equipment 类型接收数据
-      const data = await api.get('services/app/EquipmentService/Equipments?limit=10&offset=0');
+      // 使用POST方法，参数为JSON格式
+      const data = await api.post('services/app/EquipmentService/Equipments', {
+        limit: 10,
+        offset: 0
+      });
       console.log('API响应数据:', data);
       setApiData(data);
 
@@ -203,7 +238,7 @@ export default function Index() {
               <Text>设备总数</Text>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 {/* 显示更新后的设备数量 */}
-                <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{deviceCount}</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold' }}>{dashboardData.all}</Text>
                 <Text style={{ marginLeft: 15 }}>台</Text>
                 <Icon source="chevron-right" size={20} color="#999" />
               </View>
@@ -234,78 +269,26 @@ export default function Index() {
                 padding: 8    // 增加内边距避免内容过挤
               }]}>
                 <Text style={{ color: theme.colors.onSurface }}>在线设备</Text>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>0</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>{dashboardData.online}</Text>
               </View>
               <View style={[styles.centeredItem, { flex: 1, padding: 8 }]}>
                 <Text style={{ color: theme.colors.onSurface }}>离线设备</Text>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>0</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>{dashboardData.others}</Text>
               </View>
               <View style={[styles.centeredItem, { flex: 1, padding: 8 }]}>
                 <Text style={{ color: theme.colors.onSurface }}>故障报警</Text>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>0</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>{dashboardData.faultAlert}</Text>
               </View>
               <View style={[styles.centeredItem, { flex: 1, padding: 8 }]}>
                 <Text style={{ color: theme.colors.onSurface }}>执行中工单</Text>
-                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>0</Text>
+                <Text style={{ fontSize: 20, fontWeight: 'bold', color: theme.colors.onSurface }}>{dashboardData.executingService}</Text>
               </View>
             </View>
           </View>
 
-          {/* API测试区域 */}
-          <View style={[styles.addDevice, { backgroundColor: theme.colors.surface, padding: 20, marginTop: 20 }]}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>API测试</Text>
+          
 
-            <View style={styles.apiButtonContainer}>
-              <Button
-                onPress={saveToken}
-                mode="contained"
-                style={styles.apiButton}
-                buttonColor="green"
-              >
-                保存Token
-              </Button>
-
-              <Button
-                onPress={handleGetEquipments}
-                mode="contained"
-                style={styles.apiButton}
-                loading={loading}
-                disabled={loading}
-              >
-                获取设备列表
-              </Button>
-            </View>
-
-            <View style={styles.apiButtonContainer}>
-              <Button
-                onPress={handlePostApiCall}
-                mode="outlined"
-                style={styles.apiButton}
-                loading={loading}
-                disabled={loading}
-              >
-                POST请求测试
-              </Button>
-            </View>
-
-            {error && (
-              <View style={[styles.errorContainer, { backgroundColor: currentTheme === 'dark' ? '#ff5252' : '#ffebee' }]}>
-                <Text style={[styles.errorText, { color: currentTheme === 'dark' ? '#fff' : '#c62828' }]}>错误: {error}</Text>
-              </View>
-            )}
-
-            {apiData && (
-              <View style={[styles.apiResultContainer, {
-                backgroundColor: currentTheme === 'dark' ? '#424242' : '#f5f5f5',
-                borderColor: currentTheme === 'dark' ? '#616161' : '#e0e0e0'
-              }]}>
-                <Text style={[styles.resultTitle, { color: theme.colors.onSurface }]}>API响应数据:</Text>
-                <Text style={[styles.resultText, { color: currentTheme === 'dark' ? '#bdbdbd' : '#666' }]}>
-                  {JSON.stringify(apiData, null, 2)}
-                </Text>
-              </View>
-            )}
-          </View>
+           
           <View style={{
             marginTop: 20,
             flexDirection: 'row',

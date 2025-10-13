@@ -1,7 +1,8 @@
 import { useLocalization } from '@/hooks/locales/LanguageContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Appbar, Divider, Icon, Text, useTheme } from 'react-native-paper';
+import { Appbar, Button, Divider, Icon, Text, useTheme } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 export default function SettingScreen() {
@@ -25,6 +26,15 @@ export default function SettingScreen() {
       return t('setting.system');
     } else {
       return currentTheme === 'dark' ? t('setting.deepcolor') : t('setting.lightcolor');
+    }
+  };
+
+  const saveToken = async () => {
+    try {
+      await AsyncStorage.setItem('authToken', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjE1MTIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiRjhNSl9saW1pbmdodSIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL2VtYWlsYWRkcmVzcyI6ImxpYW5nLmxpLm1pbkBzaW1lZGFyYnkuY29tLmhrIiwiQXNwTmV0LklkZW50aXR5LlNlY3VyaXR5U3RhbXAiOiIzNDQ4ZWFiMS0zYWNkLTNiZDgtZDU0Yi0zOWZhMjUxYjYyMGMiLCJzdWIiOiIxNTEyIiwianRpIjoiYWIwNGY2NGQtZGNlNC00MTk3LWEyYzItNWY5OTExYzZiMGI2IiwiaWF0IjoxNzU4MDg5MzU4LCJTZXNzaW9uLk1haW5EZWFsZXJDb2RlIjoiRjhNSiIsIm5iZiI6MTc1ODA4OTM1OCwiZXhwIjoxNzU4MTc1NzU4LCJpc3MiOiJEQ1AiLCJhdWQiOiJEQ1AifQ.rVoiTUgyRpaUGNCkI080-W26XNGR2MAXUU-g2MNpco0');
+
+    } catch (error) {
+
     }
   };
 
@@ -60,7 +70,7 @@ export default function SettingScreen() {
           />
         </View>
 
-        
+
 
         <TouchableOpacity
           style={[styles.profileList, { marginTop: 10, backgroundColor: theme.colors.surface }]}
@@ -121,17 +131,24 @@ export default function SettingScreen() {
         </View>
 
         <View style={{ padding: 20, marginTop: 20 }}>
-        <TouchableOpacity
-          style={[styles.logoutButton, { backgroundColor: '#37589eff' }]}
-          onPress={() => locale === 'zh' ?
-        setLanguage('en') : setLanguage('zh')}
-        >
-          <Text style={styles.logoutText}>{t('changeLocale')}</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.logoutButton, { backgroundColor: '#37589eff' }]}
+            onPress={() => locale === 'zh' ?
+              setLanguage('en') : setLanguage('zh')}
+          >
+            <Text style={styles.logoutText}>{t('changeLocale')}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-      </View>
-      
-     
+      <Button
+        onPress={saveToken}
+        mode="contained"
+
+        buttonColor="green"
+      >
+        保存Token
+      </Button>
+
       {/* 固定在底部的注销按钮 */}
       <View style={styles.logoutContainer}>
         <TouchableOpacity

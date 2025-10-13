@@ -23,6 +23,10 @@
     "faultAlert": "Equipment Fault Alert",
     "fence": "Fence",
      "bindlist": "Bind Request List",
-    "createBind": "Create Bind Request"
+    "createBind": "Create Bind Request",
+    "count": "设备数",
+    "online": "在线数",
+    "offline": "离线",
+    "detail": "Equipment Detail"
   }
 }

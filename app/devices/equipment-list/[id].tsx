@@ -14,7 +14,7 @@ export default function EquipmentCardDetail() {
   const [selectedTab, setSelectedTab] = useState("realtimeData");
 
   return (
-    <View>
+    <View style={styles.container}>
       {/* header bar of the equipment detal  */}
       <Appbar.Header style={styles.bar} elevated>
         <Appbar.BackAction onPress={() => router.back()} />
@@ -24,7 +24,7 @@ export default function EquipmentCardDetail() {
         />
       </Appbar.Header>
 
-      <View style={{ paddingHorizontal: 10 }}>
+      <View style={styles.content}>
         {/* 实时数据，使用分析，基本信息，维保记录 */}
         <SegmentedButtons
           theme={{
@@ -33,7 +33,7 @@ export default function EquipmentCardDetail() {
               onSecondaryContainer: "white",
             },
           }}
-          style={{ marginTop: 20 }}
+          style={styles.segmentedButtons}
           value={selectedTab}
           onValueChange={setSelectedTab}
           buttons={[
@@ -80,19 +80,30 @@ export default function EquipmentCardDetail() {
           <BasicData />
         ) }
         {selectedTab === 'maintainRecord' && (
-          <View>
-            <Text>matin ss</Text>
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>maintenance record</Text>
           </View>
-        ) }
+        )}
       </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    height: '100%'
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 10
+  },
   bar: {
     backgroundColor: "#f6f6f6",
     boxShadow: "rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px",
+  },
+  segmentedButtons: {
+    marginTop: 20
   },
   Tab: {
     borderRadius: 1,
@@ -100,5 +111,22 @@ const styles = StyleSheet.create({
   labelTab: {
     fontSize: 10,
     fontWeight: 300
+  },
+  webviewContainer: {
+    flex: 1,
+    height: 500, 
+    marginTop: 20,
+  },
+  webview: {
+    flex: 1,
+    height: '100%',
+  },
+  section: {
+    flex: 1,
+    marginTop: 20,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    marginBottom: 10,
   }
 });

@@ -1,3 +1,5 @@
+import BasicData from "@/components/devices/equipment-card-detail/basic-data";
+import RealTimeData from "@/components/devices/equipment-card-detail/realtime-data";
 import { useLocalization } from "@/hooks/locales/LanguageContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -66,20 +68,16 @@ export default function EquipmentCardDetail() {
           ]}
         />
         {selectedTab === 'realtimeData' && (
-          <View style={{flex: 1, marginTop: 20 }}>
-            <Text>real time data </Text>
-            <WebView style={{flex: 1}} source={{ uri: 'https://expo.dev' }} />
-          </View>
+          <>
+           <Text>real time data </Text>
+            <RealTimeData />
+          </>
         ) }
         {selectedTab === 'useAnalysis' && (
-          <View>
-            <WebView  style={{flex: 1}} source={{ uri: 'https://expo.dev' }} />
-          </View>
+            <WebView source={{ uri: 'https://www.bilibili.com/' }} />
         ) }
         {selectedTab === 'basicData' && (
-          <View>
-            <Text>basic data </Text>
-          </View>
+          <BasicData />
         ) }
         {selectedTab === 'maintainRecord' && (
           <View>

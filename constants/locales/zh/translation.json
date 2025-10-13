@@ -1,0 +1,32 @@
+{
+  "home": {
+    "index": "首页",
+    "equipment": "设备",
+    "setting": "设置"
+  },
+  "changeLocale": "修改语言",
+  "setting": {
+    "personInfo": "个人资料",
+    "email": "邮箱",
+    "deepcolor": "深色模式",
+    "lightcolor": "明亮模式",
+    "system": "跟随系统",
+    "logout": "退出登录",
+    "PrivacyNotice": "隐私公告",
+    "contractUs": "联系我们",
+    "about": "关于"
+  },
+  "equipment": {
+    "management": "设备管理",
+    "list": "设备管理汇总",
+    "statisticReport": "设备统计报告",
+    "faultAlert": "设备故障报警",
+    "fence": "电子围栏",
+    "bindlist": "设备绑定申请列表",
+    "createBind": "创建绑定申请",
+    "count": "设备数",
+    "online": "在线数",
+    "offline": "离线",
+    "detail": "设备详情"
+  }
+}

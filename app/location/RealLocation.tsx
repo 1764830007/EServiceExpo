@@ -57,6 +57,7 @@ export default function RealLocation() {
     <View>
       {/* use signals */}
       <Text>User Id: {userCtx.user.id}, user name:{userCtx.user.name}, user email:{userCtx.user.email}</Text>
+      <Text>totalCount: {userCtx.totalCont}</Text>
       {/* <Text>Computed Count (Count * 2): {computedCount}</Text> */}
       {address && <Text>{address.city}</Text>}
       {location && (

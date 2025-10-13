@@ -42,10 +42,11 @@
       [
         "expo-location",
         {
-            "locationAlwaysAndWhenInUsePermission":"Allow EServiceApp to use your location",
-            "locationWhenInUsePermission":"Allow EServiceApp to use your location"
-        } 
-      ]
+          "locationAlwaysAndWhenInUsePermission": "Allow EServiceApp to use your location",
+          "locationWhenInUsePermission": "Allow EServiceApp to use your location"
+        }
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true,

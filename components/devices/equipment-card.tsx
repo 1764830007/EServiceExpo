@@ -1,11 +1,14 @@
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useRouter } from 'expo-router';
 import { Text, View } from "react-native";
 import { Button, Card, Chip } from "react-native-paper";
 
 export default function EquipmentCard() {
+  const router = useRouter();
   return (
     <Card
       mode="contained"
+      onPress={ () => router.push('/devices/equipment-list/12')}
       style={{ marginTop: 10, borderRadius: 5, backgroundColor: "#fff" }}
     >
       <Card.Title

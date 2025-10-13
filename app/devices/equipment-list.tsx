@@ -107,14 +107,14 @@ export default function EquipmentManageList() {
         {/* 全部，已连接，为连接 tabs */}
         <View style={{marginTop: 20}}>
           <SegmentedButtons
-            theme={{ colors: { primary: 'green' } }} 
+            theme={{ colors: { secondaryContainer: 'white' } }} 
             style={{borderRadius: 10, backgroundColor: '#e3e3e3'}}
             value={selectedTab}
             onValueChange={setSelectedTab}
             buttons={[
-              { value: "all", label: "全部", uncheckedColor: 'grey', style: styles.Tab },
-              { value: "online", label: "已连接", uncheckedColor: 'grey',  style: styles.middleTab },
-              { value: "offline", label: "未连接",uncheckedColor: 'grey', style: styles.Tab }
+              { value: "all", label: "全部", uncheckedColor: 'grey', style: {...styles.Tab, ...styles.leftTab } },
+              { value: "online", label: "已连接", uncheckedColor: 'grey',  style: styles.Tab },
+              { value: "offline", label: "未连接",uncheckedColor: 'grey', style: {...styles.Tab, ...styles.rightTab }  }
             ]}
           />
            {selectedTab === 'all' && 
@@ -147,10 +147,16 @@ const styles = StyleSheet.create({
   },
   Tab: {
    borderRadius: 10,
-   borderWidth: 0
+   borderWidth: 0,
+   marginVertical: 2,
+   marginHorizontal: 2
   },
-  middleTab: {
-    borderWidth: 0,
-    borderRadius: 10,
+  leftTab: {
+    borderTopRightRadius: 10,
+    borderBottomRightRadius: 10
+  },
+  rightTab: {
+    borderTopLeftRadius: 10,
+    borderBottomLeftRadius: 10
   }
 });

@@ -18,14 +18,14 @@ function RouteProtection({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoggedIn === null) return;
 
-    const inAuthGroup = segments[0] === "login";
-    const inTabsGroup = segments[0] === "(tabs)";
+    const inAuthGroup = segments[0] === 'User';
+    const inTabsGroup = segments[0] === '(tabs)';
 
     console.log("Route protection:", { isLoggedIn, segments });
 
     if (!isLoggedIn && !inAuthGroup) {
-      console.log("Redirecting to login");
-      router.replace("/login");
+      console.log('Redirecting to login');
+      router.replace('/User/login');
     } else if (isLoggedIn && inAuthGroup) {
       console.log("Redirecting to tabs");
       router.replace("/(tabs)");
@@ -49,6 +49,8 @@ export default function RootLayout() {
           <RouteProtection>
             <Stack screenOptions={{animation: 'fade'}}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="User" options={{ headerShown: false }} />
+              <Stack.Screen name="pin-setup" options={{ headerShown: false }} />
               <Stack.Screen name="dark-mode" options={{ headerShown: false }} />
               <Stack.Screen name="devices" options={{ headerShown: false }} />
               <Stack.Screen name="devices/equipment-list" options={{ headerShown: false }} />

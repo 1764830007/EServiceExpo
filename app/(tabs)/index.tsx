@@ -16,7 +16,7 @@ import { Tabs, TabScreen, TabsProvider } from 'react-native-paper-tabs';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 import DeviceForm from '../DeviceForm';
 import SecondTab from '../SecondTab';
-import { api } from '../services/api';
+import api from '../services/api';
 
 export default function Index() {
   const router = useRouter();
@@ -85,7 +85,7 @@ export default function Index() {
       await AsyncStorage.removeItem('username');
 
       // 使用 router 进行导航，兼容移动端和 web 端
-      router.replace('/login');
+      router.replace('/User/login');
     } catch (error) {
       console.error('Logout error:', error);
     }

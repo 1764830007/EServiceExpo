@@ -1,11 +1,11 @@
 import BasicData from "@/components/devices/equipment-card-detail/basic-data";
+import MaintainRecord from "@/components/devices/equipment-card-detail/maintain-record";
 import RealTimeData from "@/components/devices/equipment-card-detail/realtime-data";
 import { useLocalization } from "@/hooks/locales/LanguageContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Appbar, SegmentedButtons } from "react-native-paper";
-import { WebView } from "react-native-webview";
 
 export default function EquipmentCardDetail() {
   const { t } = useLocalization();
@@ -74,15 +74,13 @@ export default function EquipmentCardDetail() {
           </>
         ) }
         {selectedTab === 'useAnalysis' && (
-            <WebView source={{ uri: 'https://www.bilibili.com/' }} />
+            <RealTimeData />
         ) }
         {selectedTab === 'basicData' && (
           <BasicData />
         ) }
         {selectedTab === 'maintainRecord' && (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>maintenance record</Text>
-          </View>
+          <MaintainRecord />
         )}
       </View>
     </View>

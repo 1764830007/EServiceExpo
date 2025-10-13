@@ -47,19 +47,12 @@ export default function RootLayout() {
       <ThemeProvider>
         <AuthProvider>
           <RouteProtection>
-            <Stack screenOptions={{animation: 'fade'}}>
+            <Stack screenOptions={{animation: "ios_from_right"}}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="User" options={{ headerShown: false }} />
               <Stack.Screen name="pin-setup" options={{ headerShown: false }} />
               <Stack.Screen name="dark-mode" options={{ headerShown: false }} />
               <Stack.Screen name="devices" options={{ headerShown: false }} />
-              <Stack.Screen name="devices/equipment-list" options={{ headerShown: false }} />
-              <Stack.Screen name="devices/equipment-list/[id]" options={{ headerShown: false }} />
-              <Stack.Screen name="devices/equipment-report" options={{ headerShown: false }} />
-              <Stack.Screen name="devices/equipment-fault-alert" options={{ headerShown: false }} />
-              <Stack.Screen name="devices/equipment-fence" options={{ headerShown: false }} />
-              <Stack.Screen name="devices/equipment-bind-list" options={{ headerShown: false }} />
-              <Stack.Screen name="devices/equipment-create-bind" options={{ headerShown: false }} />
             </Stack>
             <StatusBar style="auto" />
           </RouteProtection>

@@ -27,6 +27,7 @@
     "count": "设备数",
     "online": "在线数",
     "offline": "离线",
-    "detail": "Equipment Detail"
+    "detail": "Equipment Detail",
+    "configDetail": "Config Detail"
   }
 }

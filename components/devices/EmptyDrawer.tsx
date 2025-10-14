@@ -1,6 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useRef } from "react";
-import { StyleSheet } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import {
   Gesture,
   GestureHandlerRootView,
@@ -29,6 +29,7 @@ export default function EmptyDrawer({ title, children, drawerContent }: DrawerPr
   const router = useRouter();
   const drawerRef = useRef<DrawerLayoutMethods>(null);
   const theme = useTheme();
+  const drawerWidth = Dimensions.get('window').width * 0.8;
   const helpers: Helpers = {
     openDrawer: Gesture.Tap()
       .runOnJS(true)
@@ -41,6 +42,7 @@ export default function EmptyDrawer({ title, children, drawerContent }: DrawerPr
   return (
     <GestureHandlerRootView>
       <ReanimatedDrawerLayout
+        drawerWidth={drawerWidth}
         ref={drawerRef}
         renderNavigationView={ () => drawerContent?.(helpers) }
         drawerPosition={DrawerPosition.RIGHT}

@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
@@ -62,6 +63,7 @@ export default function Index() {
   });
   const [carouselData, setCarouselData] = useState<CarouselItem[]>([]);
   const [carouselLoading, setCarouselLoading] = useState(false);
+  const [user, setUser] = useState<string>('');
 
   // 获取数字仪表板数据
   const fetchDashboardData = async () => {
@@ -69,6 +71,8 @@ export default function Index() {
     setError(null);
     try {
       const response = await api.get('/services/app/EquipmentService/GetDigitalDashborad');
+      const token = await AsyncStorage.getItem('authToken');
+      console.log('token:', token);
       console.log('仪表板数据:', response.data);
 
       if (response.data && response.data.result) {
@@ -181,6 +185,21 @@ export default function Index() {
     fetchDashboardData();
     fetchEquipments();
     fetchCarouselData();
+    // 获取用户登录名
+    const getUserName = async () => {
+      try {
+        const userName = await AsyncStorage.getItem('userLoginName');
+        if (userName) {
+          setUser(userName);
+        } else {
+          setUser('用户');
+        }
+      } catch (error) {
+        console.error('获取用户信息失败:', error);
+        setUser('用户');
+      }
+    };
+    getUserName();
   }, []);
 
   // 刷新设备列表
@@ -241,7 +260,7 @@ export default function Index() {
         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
           <Appbar.Header style={[styles.bar, { backgroundColor: currentTheme === 'dark' ? '#333' : '#fff' }]}>
             <Appbar.Content
-              title="袁满华"
+              title={user || '用户'}
               titleStyle={{
                 color: currentTheme === 'dark' ? '#fff' : '#000'
               }}

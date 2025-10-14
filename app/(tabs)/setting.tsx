@@ -1,8 +1,9 @@
 import { useLocalization } from '@/hooks/locales/LanguageContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { Appbar, Button, Divider, Icon, Text, useTheme } from 'react-native-paper';
+import { Appbar, Divider, Icon, Text, useTheme } from 'react-native-paper';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme as useCustomTheme } from '../contexts/ThemeContext';
 export default function SettingScreen() {
@@ -11,12 +12,38 @@ export default function SettingScreen() {
   const { themeMode, currentTheme } = useCustomTheme();
   const theme = useTheme();
   const { locale, setLanguage, t } = useLocalization();
+  const [user, setUser] = useState<string>('');
+  const [company, setCompany] = useState<string>('');
 
-  const handleLogout = async () => {
+  // 获取用户信息
+  useEffect(() => {
+    const getUserInfo = async () => {
+      try {
+        const userName = await AsyncStorage.getItem('userLoginName');
+        if (userName) {
+          setUser(userName);
+        } else {
+          setUser('用户');
+        }
+        // 这里可以添加获取公司信息的逻辑，暂时使用默认值
+        setCompany('涉县威远机械设备有限公司');
+      } catch (error) {
+        console.error('获取用户信息失败:', error);
+        setUser('用户');
+        setCompany('涉县威远机械设备有限公司');
+      }
+    };
+    getUserInfo();
+  }, []);
+
+    const handleLogout = async () => {
     try {
+      console.log('🟢 Settings: Logout button pressed');
+      console.log('🟢 Settings: Calling logout function...');
       await logout();
+      console.log('🟢 Settings: Logout function completed, RouteProtection should handle navigation');
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('🔴 Settings: Logout error:', error);
     }
   };
 
@@ -52,10 +79,10 @@ export default function SettingScreen() {
         </Appbar.Header>
 
         <View style={[styles.subtitleContainer, { backgroundColor: theme.colors.surface }]}>
-          <Text style={[styles.subtitleText, { color: theme.colors.onSurface, fontSize: 20 }]}>李岳叶</Text>
+          <Text style={[styles.subtitleText, { color: theme.colors.onSurface, fontSize: 20 }]}>{user || '用户'}</Text>
           <View style={[styles.name, { marginTop: 20 }]}>
             <Icon source="account" size={15} color={theme.colors.onSurface} />
-            <Text style={[styles.subtitleText, { marginLeft: 10, color: theme.colors.onSurface }]}>涉县威远机械设备有限公司</Text>
+            <Text style={[styles.subtitleText, { marginLeft: 10, color: theme.colors.onSurface }]}>{company || '涉县威远机械设备有限公司'}</Text>
           </View>
         </View>
         <View style={[styles.profileList, { marginTop: 10, backgroundColor: theme.colors.surface }]}>
@@ -139,17 +166,8 @@ export default function SettingScreen() {
             <Text style={styles.logoutText}>{t('changeLocale')}</Text>
           </TouchableOpacity>
         </View>
-      </View>
-      <Button
-        onPress={saveToken}
-        mode="contained"
 
-        buttonColor="green"
-      >
-        保存Token
-      </Button>
-
-      {/* 固定在底部的注销按钮 */}
+        {/* 固定在底部的注销按钮 */}
       <View style={styles.logoutContainer}>
         <TouchableOpacity
           style={[styles.logoutButton, { backgroundColor: '#37589eff' }]}
@@ -157,6 +175,7 @@ export default function SettingScreen() {
         >
           <Text style={styles.logoutText}>{t('setting.logout')}</Text>
         </TouchableOpacity>
+      </View>
       </View>
     </View>
   );
@@ -208,11 +227,14 @@ const styles = StyleSheet.create({
   divider: {
     marginLeft: 48,  // 20(icon) + 12(margin) + 16(padding)
   },
+
   logoutContainer: {
-    ...StyleSheet.absoluteFillObject, // 填充整个父容器
-    justifyContent: 'flex-end', // 垂直方向靠底部
-    padding: 20, // 底部和左右的间距
-    pointerEvents: 'none', // 让容器不拦截点击事件，避免影响底部内容
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    pointerEvents: 'box-none', // Allow touches to pass through to children but not to this container
   },
   logoutButton: {
     padding: 15,

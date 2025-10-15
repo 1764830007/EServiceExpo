@@ -1,10 +1,10 @@
 import { useRouter } from "expo-router";
 import React, { useRef } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
+import { Dimensions, StyleSheet } from "react-native";
 import {
   Gesture,
-  GestureDetector,
   GestureHandlerRootView,
+  TapGesture
 } from "react-native-gesture-handler";
 
 import ReanimatedDrawerLayout, {
@@ -12,48 +12,43 @@ import ReanimatedDrawerLayout, {
   DrawerPosition,
   DrawerType,
 } from "react-native-gesture-handler/ReanimatedDrawerLayout";
-import { Appbar, useTheme } from "react-native-paper";
+import { useTheme } from "react-native-paper";
 
 export interface DrawerProps {
-  title: string;
-  children: React.ReactNode;
-  drawerContent?: () => React.JSX.Element;
+  title?: string;
+  children: (helpers: Helpers) => React.ReactNode;
+  drawerContent?: (helpers: Helpers) => React.JSX.Element;
 }
 
-export default function CustomDrawer({ title, children, drawerContent }: DrawerProps) {
+export type Helpers = {
+  openDrawer: TapGesture,
+  closeDrawer: TapGesture
+}
+
+export default function EmptyDrawer({ title, children, drawerContent }: DrawerProps) {
   const router = useRouter();
   const drawerRef = useRef<DrawerLayoutMethods>(null);
   const theme = useTheme();
   const drawerWidth = Dimensions.get('window').width * 0.8;
-  const openDrawer = Gesture.Tap()
-    .runOnJS(true)
-    .onStart(() => drawerRef.current?.openDrawer());
+  const helpers: Helpers = {
+    openDrawer: Gesture.Tap()
+      .runOnJS(true)
+      .onStart(() => drawerRef.current?.openDrawer()),
+    closeDrawer: Gesture.Tap()
+      .runOnJS(true)
+      .onStart(() => drawerRef.current?.closeDrawer()),
+  };
 
   return (
     <GestureHandlerRootView>
       <ReanimatedDrawerLayout
         drawerWidth={drawerWidth}
         ref={drawerRef}
-        renderNavigationView={ () => drawerContent?.() }
+        renderNavigationView={ () => drawerContent?.(helpers) }
         drawerPosition={DrawerPosition.RIGHT}
         drawerType={DrawerType.SLIDE}
       >
-        <View>
-          {/* header bar of the equipment list  */}
-          <Appbar.Header style={styles.bar} elevated>
-            <Appbar.BackAction
-              onPress={() => router.dismissTo("/(tabs)/device")}
-            />
-            <Appbar.Content
-              title={title}
-              titleStyle={{ fontSize: 16, fontWeight: 600 }}
-            />
-            <GestureDetector gesture={openDrawer}>
-              <Appbar.Action icon="filter" />
-            </GestureDetector>
-          </Appbar.Header>
-        </View>
-        {children}
+        {children(helpers)}
       </ReanimatedDrawerLayout>
     </GestureHandlerRootView>
   );

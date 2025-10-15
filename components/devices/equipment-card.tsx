@@ -1,18 +1,23 @@
+import { Equipments } from "@/models/equipments/EquipmentList";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
 import { Text, View } from "react-native";
 import { Button, Card, Chip } from "react-native-paper";
 
-export default function EquipmentCard() {
+interface CardProps {
+  equip: Equipments,
+}
+
+export default function EquipmentCard({ equip }: CardProps) {
   const router = useRouter();
   return (
     <Card
       mode="contained"
-      onPress={ () => router.push('/devices/equipment-list/12')}
+      onPress={ () => router.push(`/devices/equipment-list/${equip.serialNumber}`)}
       style={{ marginTop: 10, borderRadius: 5, backgroundColor: "#fff" }}
     >
       <Card.Title
-        title="SEM660D / S6200604"
+        title={`${equip.model} / ${equip.serialNumber}`}
         titleStyle={{
           alignContent: "center",
           fontSize: 14,
@@ -37,7 +42,7 @@ export default function EquipmentCard() {
                 flexDirection: 'row', alignItems: 'center',
                 marginTop: 10, paddingVertical: 5 }}>
                 <AntDesign name="notification" size={20} color="black" style={{paddingHorizontal: 10 }} />
-                <Text style={{fontSize: 10, fontWeight: 300 }}>the next recommended period maintenance is 15555 hours</Text>
+                <Text style={{fontSize: 10, fontWeight: 300 }}>{`the next recommended period maintenance is ${equip.recomMaintTime} hours`}</Text>
             </View>
             {/* 设备信息,图片，总工时，位置 */}
             <View style={{flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 10 }}>
@@ -47,19 +52,19 @@ export default function EquipmentCard() {
                 <Text style={{fontSize: 12, fontWeight: 300 }}>位置：</Text>
               </View>
               <View style={{flexDirection: 'column', justifyContent: 'flex-start', gap: 10, height: 60, flexBasis: 100, flexGrow: 2, flexShrink: 1 }}>
-                <Text style={{fontSize: 12, fontWeight: 300 }}>10085.14</Text>
-                <Text style={{fontSize: 12, fontWeight: 300 }}>广东省-梅州市-大埔县，X001 441.0米；下坑东</Text>
+                <Text style={{fontSize: 12, fontWeight: 300 }}>{equip.totalHours}</Text>
+                <Text style={{fontSize: 12, fontWeight: 300 }}>{equip.location}</Text>
               </View>
             </View>
             {/* 在线离线状态，更新时间 */}
             <View style={{flexDirection: 'row', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
                 <Chip compact textStyle={{ fontSize: 12, fontWeight: 300, marginVertical: 3, paddingHorizontal: 5 }}
-                    style={{backgroundColor: '#e3e3e3'}}>离线</Chip>
+                    style={{backgroundColor: '#e3e3e3'}}>{equip.status}</Chip>
                 <View style={{ alignItems: 'center', flexBasis: 50, flexGrow: 1, flexShrink: 1 }}>
                     <Text style={{fontSize: 12, fontWeight: 300 }}>更新时间：</Text>
                 </View>
                 <View style={{ flexBasis: 100, flexGrow: 2, flexShrink: 1 }}>
-                    <Text style={{fontSize: 12, fontWeight: 300 }}>2025-09-12 07:30:18</Text>
+                    <Text style={{fontSize: 12, fontWeight: 300 }}>{ equip.locationTime ? new Date(equip.locationTime)?.toLocaleString() : ''}</Text>
                 </View>
             </View>
             {/* 行车轨迹，故障报警，电子图册，服务手册 按钮 */}

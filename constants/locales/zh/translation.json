@@ -27,6 +27,7 @@
     "count": "设备数",
     "online": "在线数",
     "offline": "离线",
-    "detail": "设备详情"
+    "detail": "设备详情",
+    "configDetail": "配置信息"
   }
 }

@@ -127,6 +127,7 @@
     "Submit": "提交",
     "SubmitFailed": "提交失败",
     "Submittedsuccessfully": "提交成功",
+    "Success": "成功",
     "TryAgain": "提交失败，请稍后再试。",
     "UpdateSucceeded": "更新成功",
     "ValidationFail": "验证失败",
@@ -635,7 +636,8 @@
     "LanguageChangeTips": "手机语言切换，请重新登录系统",
     "UnsavedDataWarning": "当前数据未保存，是否确认退出本次编辑？",
     "VersionUpdateAndroid": "部分数据无法同步，请点击更新App。",
-    "VersionUpdateIOS": "部分数据无法同步，请点击更新App。"
+    "VersionUpdateIOS": "部分数据无法同步，请点击更新App。",
+    "FailedToLoadCountryList": "加载国家列表失败。"
   },
   "success": {
     "AddedSuccessfully": "绑定成功"

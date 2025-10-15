@@ -12,6 +12,8 @@ import {
   View,
 } from 'react-native';
 import { Button } from 'react-native-paper';
+import WebViewLogin from '../../components/login/WebViewLogin';
+import { useLocalization } from '../../hooks/locales/LanguageContext';
 import api from '../services/api';
 
 interface Nation {
@@ -22,6 +24,7 @@ interface Nation {
 
 export default function Register() {
   const router = useRouter();
+  const { t } = useLocalization();
   const [formData, setFormData] = useState({
     country: '',
     phoneNumber: '',
@@ -36,6 +39,16 @@ export default function Register() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [nationList, setNationList] = useState<Nation[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [submitting, setSubmitting] = useState<boolean>(false);
+  const [mobileRegisterType, setMobileRegisterType] = useState<boolean>(true); // true for China (mobile), false for others (email)
+  const [isConfirmed, setIsConfirmed] = useState<boolean>(false); // Prevent double submission
+  const [isButtonEnabled, setIsButtonEnabled] = useState<boolean>(true); // Button state management
+  const [showWebView, setShowWebView] = useState<boolean>(false);
+  const [registrationUrl, setRegistrationUrl] = useState<string>('');
+
+  // Validation regex patterns (matching Xamarin ViewModel)
+  const phoneRegex = /^1[3456789]\d{9}$/; // Chinese mobile phone pattern
+  const emailRegex = /^\w+([-+.]\w+)*@\w+([-.\w]+)*\.\w+([-.\w]+)*$/;
 
   useEffect(() => {
     const fetchNations = async () => {
@@ -52,10 +65,11 @@ export default function Register() {
         const cn = nations.find((n:Nation) => n.ID === 'CN');
         if (cn) {
           setFormData((prev) => ({ ...prev, country: 'CN' }));
+          setMobileRegisterType(true); // China uses mobile registration
         }
       } catch (error) {
         console.error('Failed to fetch nations:', error);
-        Alert.alert('Error', 'Failed to load country list.');
+        Alert.alert(t('common.Error'), t('errors.FailedToLoadCountryList'));
       } finally {
         setLoading(false);
       }
@@ -63,41 +77,234 @@ export default function Register() {
     fetchNations();
   }, []);
 
-  const handleSubmit = async () => {
-    // Validate form with conditional logic based on country
-    const newErrors: Record<string, string> = {};
-    const isChina = formData.country === 'CN';
+  // Handle country selection change
+  const handleCountryChange = (countryId: string) => {
+    setFormData(prev => ({ ...prev, country: countryId }));
     
-    if (!formData.country) newErrors.country = 'required';
-    
-    // China: Phone required, Email optional
-    // Other countries: Email required, Phone optional
-    if (isChina) {
-      if (!formData.phoneNumber) newErrors.phoneNumber = 'required';
-      // Email is optional for China
+    // Update validation type based on country
+    if (countryId === 'CN') {
+      setMobileRegisterType(true); // China: mobile required, email optional
     } else {
-      if (!formData.email) newErrors.email = 'required';
-      // Phone is optional for other countries
+      setMobileRegisterType(false); // Others: email required, mobile optional
     }
     
-    if (!formData.username) newErrors.username = 'required';
-    if (!formData.givenName) newErrors.givenName = 'required';
-    if (!formData.surname) newErrors.surname = 'required';
-    if (!formData.streetAddress) newErrors.streetAddress = 'required';
+    // Clear previous errors when country changes
+    setErrors({});
+  };
 
+  // Hide all error messages
+  const hideErrorMessages = () => {
+    setErrors({});
+  };
+
+  // Phone validation function
+  const validatePhone = (phone: string): boolean => {
+    return phoneRegex.test(phone);
+  };
+
+  // Email validation function
+  const validateEmail = (email: string): boolean => {
+    return emailRegex.test(email);
+  };
+
+  // Email format validation function
+  const validateEmailFormat = (email: string): boolean => {
+    return emailRegex.test(email);
+  };
+
+  // Validate form and submit
+  const validateAndSubmit = async () => {
+    hideErrorMessages();
+    const newErrors: Record<string, string> = {};
+    
+    // Check required fields first
+    if (!formData.streetAddress || formData.streetAddress.trim() === '') {
+      newErrors.streetAddress = t('registration.required');
+    }
+    if (!formData.surname || formData.surname.trim() === '') {
+      newErrors.surname = t('registration.required');
+    }
+    if (!formData.username || formData.username.trim() === '') {
+      newErrors.username = t('registration.required');
+    }
+    if (!formData.givenName || formData.givenName.trim() === '') {
+      newErrors.givenName = t('registration.required');
+    }
+
+    // Username length validation
+    if (formData.username && formData.username.length < 3) {
+      newErrors.username = t('registration.UsernameTips');
+    }
+    
+    // Validate based on registration type
+    if (mobileRegisterType) {
+      // China: Mobile required and format validation
+      if (!formData.phoneNumber || formData.phoneNumber.trim() === '') {
+        newErrors.phoneNumber = t('registration.required');
+      } else if (!validatePhone(formData.phoneNumber)) {
+        Alert.alert(t('common.SubmitFailed'), t('registration.WrongPhoneFormat'));
+        return;
+      }
+    } else {
+      // Other countries: Email required and format validation
+      if (!formData.email || formData.email.trim() === '') {
+        newErrors.email = t('registration.required');
+      } else if (!validateEmailFormat(formData.email)) {
+        Alert.alert(t('common.SubmitFailed'), t('registration.WrongEmailFormat'));
+        return;
+      }
+    }
+
+    // If there are validation errors, show them and return
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
 
-    try {
-      // TODO: Implement registration API call
-      console.log('Form submitted:', formData);
-      // On success, navigate back to login
-      router.push('/User/login');
-    } catch (error) {
-      console.error('Registration failed:', error);
+    // Proceed with submission
+    await submitRegistration();
+  };
+
+  const submitRegistration = async () => {
+    // Prevent double submission and disable button
+    if (isConfirmed) {
+      return;
     }
+    
+    setIsConfirmed(true);
+    setSubmitting(true);
+    setIsButtonEnabled(false); // Disable button during submission
+    
+    try {
+      // Format phone number with +86 prefix for China
+      let formattedPhone = null;
+      if (formData.phoneNumber && formData.phoneNumber.length > 1) {
+        formattedPhone = mobileRegisterType ? `+86${formData.phoneNumber}` : formData.phoneNumber;
+      }
+
+      // Get selected nation from nationList
+      const selectedNation = nationList.find(n => n.ID === formData.country);
+      
+      // Prepare registration data (matching Xamarin B2CRegisterRequest structure)
+      const registrationData: any = {
+        email: formData.email,
+        signinname: formData.username,
+        givenname: formData.givenName,
+        surname: formData.surname,
+        country: selectedNation?.ID || formData.country,
+        streetAddress: formData.streetAddress,
+        telephonenumber: formattedPhone,
+        validatetype: mobileRegisterType ? 'telephonenumber' : 'email',
+        isfrommobile: true, // Always true for React Native app
+        isdarkmodel: false // Could be determined from theme context
+      };
+
+      // Only include postalcode if it's not empty
+      if (formData.postalCode && formData.postalCode.trim() !== '') {
+        registrationData.postalcode = formData.postalCode;
+      }
+
+      console.log('Registration data:', registrationData);
+      
+      // Call registration API (matching Xamarin API call structure)
+      const response = await api.post('/services/app/EndCustomer/Register', registrationData);
+      
+      console.log('Registration response:', response.data);
+      
+      if (response.data && response.data.success === true) {
+        // Success case - show WebView with the returned URL
+        setIsConfirmed(false);
+        const authUrl = response.data.result;
+        
+        console.log('Registration success, received URL:', authUrl);
+        
+        if (authUrl) {
+          // Show WebView with the registration success URL
+          setRegistrationUrl(authUrl);
+          setShowWebView(true);
+        } else {
+          // Fallback if no URL is returned
+          Alert.alert(
+            t('common.Submittedsuccessfully'), 
+            t('common.ValidationSuccessful'),
+            [
+              {
+                text: t('common.Close'),
+                onPress: () => router.push('/User/login')
+              }
+            ]
+          );
+        }
+      } else {
+        // Error case
+        setIsConfirmed(false);
+        const errorMessage = response.data?.error?.message || t('common.SubmitFailed');
+        Alert.alert(t('common.Warning'), errorMessage);
+      }
+      
+    } catch (error: any) {
+      console.error('Registration failed:', error);
+      setIsConfirmed(false);
+      
+      // Handle different types of errors
+      let errorMessage = t('common.SubmitFailed');
+      if (error?.response?.data?.error?.message) {
+        errorMessage = error.response.data.error.message;
+      }
+      
+      Alert.alert(t('common.Warning'), errorMessage);
+    } finally {
+      setSubmitting(false);
+      setIsButtonEnabled(true); // Re-enable button
+    }
+  };
+
+  const handleSubmit = async () => {
+    // Prevent double submission (matching Xamarin logic)
+    if (!isConfirmed) {
+      await validateAndSubmit();
+    }
+  };
+
+  // WebView success handler
+  const handleWebViewSuccess = () => {
+    setShowWebView(false);
+    setRegistrationUrl('');
+    
+    // Show success message and navigate to main app
+    Alert.alert(
+      t('common.Submittedsuccessfully'),
+      t('common.ValidationSuccessful'),
+      [
+        {
+          text: t('common.Close'),
+          onPress: () => {
+            // Navigate to the main app or login page
+            router.push('/');
+          }
+        }
+      ]
+    );
+  };
+
+  // WebView error handler
+  const handleWebViewError = (errorMessage: string) => {
+    setShowWebView(false);
+    setRegistrationUrl('');
+    
+    Alert.alert(
+      t('common.Error'),
+      errorMessage || t('common.SubmitFailed')
+    );
+  };
+
+  // WebView close handler
+  const handleWebViewClose = () => {
+    setShowWebView(false);
+    setRegistrationUrl('');
+    
+    // Navigate back to login page
+    router.push('/User/login');
   };
 
   const renderField = (
@@ -112,12 +319,12 @@ export default function Register() {
     // Map label to field key for error handling
     const errorKey = fieldKey || (() => {
       switch (label) {
-        case 'Phone Number': return 'phoneNumber';
-        case 'Email': return 'email';
-        case 'Username': return 'username';
-        case 'Given Name': return 'givenName';
-        case 'Surname': return 'surname';
-        case 'Street Address': return 'streetAddress';
+        case t('common.PhoneNumber'): return 'phoneNumber';
+        case t('common.Email'): return 'email';
+        case t('auth.Username'): return 'username';
+        case t('auth.Givenname'): return 'givenName';
+        case t('auth.Surname'): return 'surname';
+        case t('registration.ContactAddress'): return 'streetAddress';
         default: return label.toLowerCase();
       }
     })();
@@ -149,25 +356,24 @@ export default function Register() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.formContainer}>
-        <View style={styles.fieldContainer}>
-          <View style={styles.labelContainer}>
-            <Text style={styles.label}>Country</Text>
-            <Text style={styles.requiredStar}>*</Text>
-          </View>
+    <>
+      <ScrollView style={styles.container}>
+        <View style={styles.formContainer}>
+          <View style={styles.fieldContainer}>
+            <View style={styles.labelContainer}>
+              <Text style={styles.label}>{t('common.Country')}</Text>
+              <Text style={styles.requiredStar}>*</Text>
+            </View>
           <View style={styles.pickerWrapper}>
             {loading ? (
               <ActivityIndicator size="small" color="#007AFF" />
             ) : (
               <Picker
                 selectedValue={formData.country}
-                onValueChange={(value: string) =>
-                  setFormData(prev => ({ ...prev, country: value }))
-                }
+                onValueChange={(value: string) => handleCountryChange(value)}
                 style={styles.picker}
               >
-                <Picker.Item label="Click to Select" value="" />
+                <Picker.Item label={t('common.ClickToSelect')} value="" />
                 {nationList.map((nation) => (
                   <Picker.Item
                     key={nation.ID}
@@ -184,69 +390,69 @@ export default function Register() {
         {formData.country && (
           <View style={styles.validationInfo}>
             <Text style={styles.validationText}>
-              {formData.country === '44' 
-                ? 'For China: Phone number is required, email is optional'
-                : 'Phone number is optional, email is required'
+              {formData.country === 'CN' 
+                ? t('registration.CountryTips')
+                : t('registration.CountryTips')
               }
             </Text>
           </View>
         )}
 
         {renderField(
-          'Phone Number',
+          t('common.PhoneNumber'),
           formData.phoneNumber,
           (text) => setFormData(prev => ({ ...prev, phoneNumber: text })),
-          formData.country === 'CN' ? 'Click to Enter (Required)' : 'Click to Enter (Optional)',
-          formData.country === 'CN', // Required for China
+          mobileRegisterType ? t('common.ClickToEnterRequired') : t('common.ClickToEnterNotRequired'),
+          mobileRegisterType, // Required for China
           'numeric'
         )}
 
         {renderField(
-          'Email',
+          t('common.Email'),
           formData.email,
           (text) => setFormData(prev => ({ ...prev, email: text })),
-          formData.country === 'CN' ? 'Click to Enter (Optional)' : 'Click to Enter (Required)',
-          formData.country !== 'CN', // Required for non-China countries
+          !mobileRegisterType ? t('common.ClickToEnterRequired') : t('common.ClickToEnterNotRequired'),
+          !mobileRegisterType, // Required for non-China countries
           'email-address'
         )}
 
         {renderField(
-          'Username',
+          t('auth.Username'),
           formData.username,
           (text) => setFormData(prev => ({ ...prev, username: text })),
-          'Click to Enter (Required)',
+          t('common.ClickToEnterRequired'),
           true
         )}
 
         {renderField(
-          'Given Name',
+          t('auth.Givenname'),
           formData.givenName,
           (text) => setFormData(prev => ({ ...prev, givenName: text })),
-          'Click to Enter (Required)',
+          t('common.ClickToEnterRequired'),
           true
         )}
 
         {renderField(
-          'Surname',
+          t('auth.Surname'),
           formData.surname,
           (text) => setFormData(prev => ({ ...prev, surname: text })),
-          'Click to Enter (Required)',
+          t('common.ClickToEnterRequired'),
           true
         )}
 
         {renderField(
-          'Street Address',
+          t('registration.ContactAddress'),
           formData.streetAddress,
           (text) => setFormData(prev => ({ ...prev, streetAddress: text })),
-          'Enter your street address',
+          t('registration.RegisterStreetTips'),
           true
         )}
 
         {renderField(
-          'Postal Code',
+          t('equipment.EquipmentPostalCode'),
           formData.postalCode,
           (text) => setFormData(prev => ({ ...prev, postalCode: text })),
-          'Click to Enter (Optional)',
+          t('common.ClickToEnterNotRequired'),
           false
         )}
 
@@ -255,11 +461,22 @@ export default function Register() {
           onPress={handleSubmit}
           style={styles.submitButton}
           buttonColor="#007AFF"
+          loading={submitting}
+          disabled={submitting || !isButtonEnabled}
         >
-          Submit
+          {submitting ? t('common.Loading') : t('common.Submit')}
         </Button>
       </View>
     </ScrollView>
+
+    <WebViewLogin
+      visible={showWebView}
+      onClose={handleWebViewClose}
+      onLoginSuccess={handleWebViewSuccess}
+      onLoginError={handleWebViewError}
+      initialUrl={registrationUrl}
+    />
+    </>
   );
 }
 

@@ -22,11 +22,11 @@
     "statisticReport": "Equipment Statistic Report",
     "faultAlert": "Equipment Fault Alert",
     "fence": "Fence",
-     "bindlist": "Bind Request List",
+    "bindlist": "Bind Request List",
     "createBind": "Create Bind Request",
-    "count": "设备数",
-    "online": "在线数",
-    "offline": "离线",
+    "count": "Count",
+    "online": "Online",
+    "offline": "Offline",
     "detail": "Equipment Detail",
     "configDetail": "Config Detail",
     "Equipment": "Equipment",
@@ -127,6 +127,7 @@
     "Submit": "Submit",
     "SubmitFailed": "Submit Failed",
     "Submittedsuccessfully": "Submitted Successfully",
+    "Success": "Success",
     "TryAgain": "Failed to submit, please try again.",
     "UpdateSucceeded": "Update Succeeded",
     "ValidationFail": "Verification Failed",
@@ -635,7 +636,8 @@
     "LanguageChangeTips": "Mobile phone language switching, please log in to the system again.",
     "UnsavedDataWarning": "The contents are not saved, confirm to quit editing?",
     "VersionUpdateAndroid": "Data cannot be updated, please click to upgrade the App. ",
-    "VersionUpdateIOS": "Data cannot be updated, please click to upgrade the App. "
+    "VersionUpdateIOS": "Data cannot be updated, please click to upgrade the App. ",
+    "FailedToLoadCountryList": "Failed to load country list."
   },
   "success": {
     "AddedSuccessfully": "Added Successfully"

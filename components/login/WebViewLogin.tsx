@@ -22,9 +22,10 @@ interface WebViewLoginProps {
   onClose: () => void;
   onLoginSuccess?: () => void;
   onLoginError?: (error: string) => void;
+  initialUrl?: string; // Optional custom URL for registration flows
 }
 
-export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLoginError }: WebViewLoginProps) {
+export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLoginError, initialUrl }: WebViewLoginProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [webviewLoading, setWebviewLoading] = useState<boolean>(false);
   const [authUrl, setAuthUrl] = useState<string>('');
@@ -206,12 +207,19 @@ export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLogin
   // Initialize the login URL when the WebView becomes visible
   React.useEffect(() => {
     if (visible) {
-      const baseLogin = Consts.Config.LoginUrl || `https://${Consts.Config.Host}/Login/GetB2CLogin?isFromMobile=true`;
-      const AUTH_URL = `${baseLogin}&isDarkMode=true`;
-      setLoading(true);
-      setAuthUrl(AUTH_URL);
+      if (initialUrl) {
+        // Use the provided initial URL (e.g., for registration flows)
+        setLoading(true);
+        setAuthUrl(initialUrl);
+      } else {
+        // Use the default login URL
+        const baseLogin = Consts.Config.LoginUrl || `https://${Consts.Config.Host}/Login/GetB2CLogin?isFromMobile=true`;
+        const AUTH_URL = `${baseLogin}&isDarkMode=true`;
+        setLoading(true);
+        setAuthUrl(AUTH_URL);
+      }
     }
-  }, [visible]);
+  }, [visible, initialUrl]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>

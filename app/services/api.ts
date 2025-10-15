@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { router } from 'expo-router';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import { Consts } from '../../constants/config';
+import AuthService from './AuthService';
 
 // Create event emitter for auth-related events
 export const loginEvents = new NativeEventEmitter(NativeModules.AuthModule || {});
@@ -148,15 +150,11 @@ api.interceptors.response.use(
         console.error('🔐 RefreshTokenFromApiAsync - Error:', error.message);
         
         try {
-          // Import and use AuthService for proper cleanup
-          const { default: authService } = await import('./AuthService');
+          // Use AuthService for proper cleanup
           console.log('🔄 Calling AuthService.logout()...');
           
-          // Call logout and import router in parallel
-          const [_, { router }] = await Promise.all([
-            authService.logout(),
-            import('expo-router')
-          ]);
+          // Call logout
+          await AuthService.logout();
           
           console.log('✅ Logout completed successfully');
 
@@ -176,16 +174,13 @@ api.interceptors.response.use(
           // Emergency cleanup if logout fails
           try {
             console.log('🔄 Attempting emergency cleanup...');
-            const [_, { router }] = await Promise.all([
-              AsyncStorage.multiRemove([
-                'authToken', 
-                'refreshToken',
-                'isLoggedIn',
-                'tokenExpiration',
-                'refreshTokenExpiration',
-                'userLoginName'
-              ]),
-              import('expo-router')
+            await AsyncStorage.multiRemove([
+              'authToken', 
+              'refreshToken',
+              'isLoggedIn',
+              'tokenExpiration',
+              'refreshTokenExpiration',
+              'userLoginName'
             ]);
 
             // Emit auth failure event for emergency cleanup

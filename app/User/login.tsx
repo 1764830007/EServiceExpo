@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Button } from 'react-native-paper';
-import WebViewLogin from '../../components/WebViewLogin';
+import WebViewLogin from '../../components/login/WebViewLogin';
 
 /**
  * Event emitter for login-related events across components.
@@ -36,7 +36,6 @@ export default function Login() {
 
   const handleLoginSuccess = () => {
     setLoading(false);
-    router.push('/');
   };
 
   const handleLoginError = (errorMessage: string) => {

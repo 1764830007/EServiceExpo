@@ -1,7 +1,9 @@
 import {
   DealerDto,
   EquipmentListDto,
-  EquipmentSearchDto
+  EquipmentSearchDto,
+  ModelDto,
+  NationDto
 } from "@/models/equipments/EquipmentList";
 import api from "../api";
 
@@ -27,4 +29,14 @@ export const LoadDealerOptions = async() => {
  const res =  await api.get<{ result: { dealers: DealerDto[] } }>('/services/app/UserService/GetUserDealerInfo');
  const dealers = res.data.result.dealers;
  return dealers;
+}
+// 加载 models
+export const LoadModelOptions = async() => {
+const res = await api.get<{ result: ModelDto[], success: boolean, error: string }>('/services/app/EquipmentService/EquipmentModels');
+return res.data.result;
+};
+//  加载 位置
+export const LoadCountryOptions = async(type: number = 0) => {
+  const res = await api.get<{ result: NationDto[] }>(`/services/app/GeoService/Nations?type=${type}`);
+  return res.data.result;
 }

@@ -7,8 +7,8 @@ import { EquipmentSearchDto, Helpers } from "@/models/equipments/EquipmentList";
 import Feather from "@expo/vector-icons/Feather";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { FlatList, StyleSheet, Text, View } from "react-native";
-import { Icon, Searchbar, SegmentedButtons } from "react-native-paper";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import { Searchbar, SegmentedButtons } from "react-native-paper";
 
 export default function EquipmentManageList() {
   const { t } = useLocalization();
@@ -54,11 +54,16 @@ export default function EquipmentManageList() {
               borderRadius: 15,
               marginTop: 10,
               height: 36,
+              flexBasis: 'auto',
+              flexShrink: 1
             }}
             inputStyle={{ minHeight: 0, fontSize: 14 }}
             value={searchText}
           ></Searchbar>
-          <Icon source="map-check" size={24} />
+          <View style={{flexDirection: 'column', alignItems: 'center'}}>
+             <Image source={require('../../assets/images/equipments/equipment_map.png')} />
+             <Text>Map</Text>
+          </View>
         </View>
         {/* 设备数，在线数，离线 */}
         <View

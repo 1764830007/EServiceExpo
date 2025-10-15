@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { Button } from 'react-native-paper';
 import WebViewLogin from '../../components/login/WebViewLogin';
+import { useLocalization } from '../../hooks/locales/LanguageContext';
 
 /**
  * Event emitter for login-related events across components.
@@ -28,6 +29,7 @@ export default function Login() {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const router = useRouter();
+  const { t } = useLocalization();
 
   const handleLogin = () => {
     setLoading(true);
@@ -45,7 +47,7 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.brandText}>A Caterpillar Brand</Text>
+      <Text style={styles.brandText}>{t('app.CaterpillarBrand')}</Text>
 
       {error ? (
         <View style={styles.errorContainer}>
@@ -65,24 +67,24 @@ export default function Login() {
           loading={loading}
           disabled={loading}
         >
-          {loading ? '登录中...' : '登录'}
+          {loading ? t('common.Loading') : t('auth.Login')}
         </Button>
       </View>
 
       <View style={styles.registerContainer}>
-        <Text>Don't have an account? </Text>
-        <Link href="/User/register" style={styles.registerLink}>Create Account</Link>
+        <Text>{t('auth.DontHaveAccount')} </Text>
+        <Link href="/User/register" style={styles.registerLink}>{t('auth.CreateAccount')}</Link>
       </View>
 
-      <Text style={styles.glaxText}>Or</Text>
-      <Text style={styles.glaxText}>RECOMMEND TO USE WECHAT TO LOGIN QUICKLY</Text>
+      <Text style={styles.glaxText}>{t('auth.Or')}</Text>
+      <Text style={styles.glaxText}>{t('auth.RecommendToUseWechat')}</Text>
       <Button
         mode="contained"
         style={styles.wechatButton}
         buttonColor="#07C160"
         onPress={() => console.log('微信登录')}
       >
-        WECHAT LOGIN
+        {t('auth.WeChatLogin')}
       </Button>
 
       <WebViewLogin

@@ -82,11 +82,12 @@ api.interceptors.request.use(
 // Response interceptor for API calls
 api.interceptors.response.use(
   (response) => {
-    // Log successful response
-    console.log('\n✅ API Response:', {
-      status: response.status,
-      data: response.data
-    });
+    // Log successful response with better formatting
+    console.log('\n✅ API Response:');
+    console.log('Status:', response.status);
+    console.log('URL:', response.config?.url);
+    console.log('Data:', response.data);
+    
     return response;
   },
   async (error) => {

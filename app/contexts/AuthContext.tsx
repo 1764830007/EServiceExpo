@@ -58,8 +58,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuthStatus = async () => {
     try {
-      const loggedIn = await AsyncStorage.getItem('isLoggedIn');
-      setIsLoggedIn(loggedIn === 'true');
+      const [loggedIn, pinVerified, lastVerification] = await Promise.all([
+        AsyncStorage.getItem('isLoggedIn'),
+        AsyncStorage.getItem('pinVerified'),
+        AsyncStorage.getItem('lastPinVerification')
+      ]);
+
+      const isLoggedIn = loggedIn === 'true';
+      const isPinVerified = pinVerified === 'true';
+      
+      // Check if PIN verification has expired (24 hours)
+      const pinExpired = lastVerification 
+        ? Date.now() - new Date(lastVerification).getTime() > 24 * 60 * 60 * 1000
+        : true;
+
+      console.log('Auth status check:', {
+        isLoggedIn,
+        isPinVerified,
+        pinExpired,
+        lastVerification
+      });
+
+      // User is truly authenticated only if logged in AND PIN is verified (and not expired)
+      setIsLoggedIn(isLoggedIn && isPinVerified && !pinExpired);
     } catch (error) {
       console.error('Auth check error:', error);
       setIsLoggedIn(false);
@@ -72,8 +93,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    await AsyncStorage.removeItem('isLoggedIn');
-    await AsyncStorage.removeItem('username');
+    await AsyncStorage.clear();
+    console.log('User logged out, cleared AsyncStorage');
+    AsyncStorage.getAllKeys().then(keys => console.log(keys));
     setIsLoggedIn(false);
   };
 

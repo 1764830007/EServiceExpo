@@ -26,23 +26,24 @@ export const loginEvents = new NativeEventEmitter();
  */
 export default function Login() {
   const [showWebView, setShowWebView] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const router = useRouter();
   const { t } = useLocalization();
 
   const handleLogin = () => {
-    setLoading(true);
     setShowWebView(true);
   };
 
   const handleLoginSuccess = () => {
-    setLoading(false);
+    // Login success handled by WebView component
   };
 
   const handleLoginError = (errorMessage: string) => {
     setError(errorMessage);
-    setLoading(false);
+  };
+
+  const handleWebViewClose = () => {
+    setShowWebView(false);
   };
 
   return (
@@ -64,10 +65,8 @@ export default function Login() {
           mode="contained"
           style={styles.loginButton}
           buttonColor="orange"
-          loading={loading}
-          disabled={loading}
         >
-          {loading ? t('common.Loading') : t('auth.Login')}
+          {t('auth.Login')}
         </Button>
       </View>
 
@@ -89,7 +88,7 @@ export default function Login() {
 
       <WebViewLogin
         visible={showWebView}
-        onClose={() => setShowWebView(false)}
+        onClose={handleWebViewClose}
         onLoginSuccess={handleLoginSuccess}
         onLoginError={handleLoginError}
       />

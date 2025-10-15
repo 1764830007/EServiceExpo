@@ -15,6 +15,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     checkAuthStatus();
+
+    // Set up event listeners with dynamic import to avoid circular dependencies
+    const setupEventListeners = async () => {
+      try {
+        const { authEvents } = await import('../services/AuthService');
+        
+        // Listen for logout events from AuthService
+        const logoutSubscription = authEvents.addListener('logout', (event: any) => {
+          console.log('🔔 AuthContext received logout event:', event);
+          setIsLoggedIn(false);
+        });
+
+        // Listen for auth failure events (token refresh failures, etc.)
+        const authFailureSubscription = authEvents.addListener('authFailure', (event: any) => {
+          console.log('🔔 AuthContext received auth failure event:', event);
+          setIsLoggedIn(false);
+        });
+
+        // Return cleanup function
+        return () => {
+          logoutSubscription.remove();
+          authFailureSubscription.remove();
+        };
+      } catch (error) {
+        console.error('Error setting up auth event listeners:', error);
+      }
+    };
+
+    let cleanup: (() => void) | undefined;
+    setupEventListeners().then((cleanupFn) => {
+      cleanup = cleanupFn;
+    });
+
+    // Cleanup on unmount
+    return () => {
+      if (cleanup) {
+        cleanup();
+      }
+    };
   }, []);
 
   const checkAuthStatus = async () => {

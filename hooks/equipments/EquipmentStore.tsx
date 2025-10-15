@@ -1,5 +1,5 @@
 import { getEquipmentLists } from "@/app/services/equipments/EquipmentService";
-import { DealerDto, EquipmentListDto, EquipmentSearchDto } from "@/models/equipments/EquipmentList";
+import { DealerDto, EquipmentListDto, EquipmentSearchDto, ModelDto, NationDto } from "@/models/equipments/EquipmentList";
 import { defineStore } from "@helux/store-pinia";
 
 const equipmentStore = defineStore("equipmentStore", {
@@ -8,9 +8,9 @@ const equipmentStore = defineStore("equipmentStore", {
     equipmentStatus: '',
     searchText: '',
     dealerList: [] as DealerDto[],
-    machineModel: '',
+    machineModels: [] as ModelDto[],
     machineType: '',
-    locationCode: '',
+    nationCodes: [] as NationDto[],
     totalHoursMin: 0,
     totalHoursMax: 0,
     equipments: {} as EquipmentListDto
@@ -40,12 +40,28 @@ const equipmentStore = defineStore("equipmentStore", {
         dealer.checked = !dealer.checked;
       }
     },
-    setMachineModel(text: string) {
-      this.machineModel = text;
+    setMachineModels(modelDtos: ModelDto[]) {
+      this.machineModels = modelDtos;
+    },
+    setModelToggle(value: string) {
+      let model = this.machineModels.find(p => p.value === value);
+      if (model) {
+        model.selected = !model.selected;
+      }
+    },
+    setNationCodes(nationDtos: NationDto[]) {
+      this.nationCodes = nationDtos;
+    },
+     setNationToggle(value: string) {
+      let nation = this.nationCodes.find(p => p.value === value);
+      if (nation) {
+        nation.selected = !nation.selected;
+      }
     },
     setMachineType(text: string) {
-      this.machineModel = text;
+      this.machineType = text;
     },
+
   },
   lifecycle: {
     // 可以访问actions，state

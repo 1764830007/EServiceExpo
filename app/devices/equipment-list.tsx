@@ -1,9 +1,9 @@
 import CustomDrawer from "@/components/devices/CustomDrawer";
-import EquipmentCard from "@/components/devices/equipment-card";
-import EquipmentCardSearch from "@/components/devices/equipment-card-search";
+import EquipmentCard from "@/components/devices/equipment-card/equipment-card";
+import EquipmentCardFilter from "@/components/devices/equipment-card/equipment-card-filter";
 import equipmentStore from "@/hooks/equipments/EquipmentStore";
 import { useLocalization } from "@/hooks/locales/LanguageContext";
-import { EquipmentSearchDto } from "@/models/equipments/EquipmentList";
+import { EquipmentSearchDto, Helpers } from "@/models/equipments/EquipmentList";
 import Feather from "@expo/vector-icons/Feather";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -25,13 +25,13 @@ export default function EquipmentManageList() {
   //   { value: "offline", label: "未连接"},
   // ];
   useEffect(() => {
-    console.log("equipments", equipments);
+    console.log("equipments");
   }, [equipments]);
 
   return (
     <CustomDrawer
-      drawerContent={() => (
-        <EquipmentCardSearch filter={new EquipmentSearchDto()} />
+      drawerContent={(helpers: Helpers) => (
+        <EquipmentCardFilter outhelpers={helpers} filter={new EquipmentSearchDto()} />
       )}
       title={t("equipment.list")}
     >

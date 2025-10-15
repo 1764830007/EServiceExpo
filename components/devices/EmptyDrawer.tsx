@@ -1,10 +1,10 @@
+import { Helpers } from "@/models/equipments/EquipmentList";
 import { useRouter } from "expo-router";
 import React, { useRef } from "react";
 import { Dimensions, StyleSheet } from "react-native";
 import {
   Gesture,
-  GestureHandlerRootView,
-  TapGesture
+  GestureHandlerRootView
 } from "react-native-gesture-handler";
 
 import ReanimatedDrawerLayout, {
@@ -20,17 +20,12 @@ export interface DrawerProps {
   drawerContent?: (helpers: Helpers) => React.JSX.Element;
 }
 
-export type Helpers = {
-  openDrawer: TapGesture,
-  closeDrawer: TapGesture
-}
-
 export default function EmptyDrawer({ title, children, drawerContent }: DrawerProps) {
   const router = useRouter();
   const drawerRef = useRef<DrawerLayoutMethods>(null);
   const theme = useTheme();
   const drawerWidth = Dimensions.get('window').width * 0.8;
-  const helpers: Helpers = {
+  const innerHelpers: Helpers = {
     openDrawer: Gesture.Tap()
       .runOnJS(true)
       .onStart(() => drawerRef.current?.openDrawer()),
@@ -44,11 +39,11 @@ export default function EmptyDrawer({ title, children, drawerContent }: DrawerPr
       <ReanimatedDrawerLayout
         drawerWidth={drawerWidth}
         ref={drawerRef}
-        renderNavigationView={ () => drawerContent?.(helpers) }
+        renderNavigationView={ () => drawerContent?.(innerHelpers) }
         drawerPosition={DrawerPosition.RIGHT}
         drawerType={DrawerType.SLIDE}
       >
-        {children(helpers)}
+        {children(innerHelpers)}
       </ReanimatedDrawerLayout>
     </GestureHandlerRootView>
   );

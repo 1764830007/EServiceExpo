@@ -1,3 +1,4 @@
+import { Helpers } from "@/models/equipments/EquipmentList";
 import { useRouter } from "expo-router";
 import React, { useRef } from "react";
 import { Dimensions, StyleSheet, View } from "react-native";
@@ -17,7 +18,7 @@ import { Appbar, useTheme } from "react-native-paper";
 export interface DrawerProps {
   title: string;
   children: React.ReactNode;
-  drawerContent?: () => React.JSX.Element;
+  drawerContent?: (helpers: Helpers) => React.JSX.Element;
 }
 
 export default function CustomDrawer({ title, children, drawerContent }: DrawerProps) {
@@ -25,16 +26,21 @@ export default function CustomDrawer({ title, children, drawerContent }: DrawerP
   const drawerRef = useRef<DrawerLayoutMethods>(null);
   const theme = useTheme();
   const drawerWidth = Dimensions.get('window').width * 0.8;
-  const openDrawer = Gesture.Tap()
-    .runOnJS(true)
-    .onStart(() => drawerRef.current?.openDrawer());
+  const outerHelpers: Helpers = {
+    openDrawer: Gesture.Tap()
+      .runOnJS(true)
+      .onStart(() => drawerRef.current?.openDrawer()),
+    closeDrawer: Gesture.Tap()
+      .runOnJS(true)
+      .onStart(() => drawerRef.current?.closeDrawer()),
+  };
 
   return (
     <GestureHandlerRootView>
       <ReanimatedDrawerLayout
         drawerWidth={drawerWidth}
         ref={drawerRef}
-        renderNavigationView={ () => drawerContent?.() }
+        renderNavigationView={ () => drawerContent?.(outerHelpers) }
         drawerPosition={DrawerPosition.RIGHT}
         drawerType={DrawerType.SLIDE}
       >
@@ -48,7 +54,7 @@ export default function CustomDrawer({ title, children, drawerContent }: DrawerP
               title={title}
               titleStyle={{ fontSize: 16, fontWeight: 600 }}
             />
-            <GestureDetector gesture={openDrawer}>
+            <GestureDetector gesture={outerHelpers.openDrawer}>
               <Appbar.Action icon="filter" />
             </GestureDetector>
           </Appbar.Header>

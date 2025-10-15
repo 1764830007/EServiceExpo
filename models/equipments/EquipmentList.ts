@@ -1,3 +1,5 @@
+import { TapGesture } from "react-native-gesture-handler";
+
 export class EquipmentSearchDto {
   constructor(
     public limit: number = 10,
@@ -51,4 +53,19 @@ export interface DealerDto {
   salesOrganization: string;
   dealerType: string;
   checked: boolean;
+}
+
+interface SelectOption {
+  text: string;
+  value: string;
+  selected: boolean;
+}
+
+export interface ModelDto extends SelectOption {};
+
+export interface NationDto extends SelectOption {};
+
+export type Helpers = {
+  openDrawer: TapGesture,
+  closeDrawer: TapGesture
 }

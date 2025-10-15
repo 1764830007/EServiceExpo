@@ -64,10 +64,22 @@ export default function Register() {
   }, []);
 
   const handleSubmit = async () => {
-    // Validate form
+    // Validate form with conditional logic based on country
     const newErrors: Record<string, string> = {};
+    const isChina = formData.country === 'CN';
+    
     if (!formData.country) newErrors.country = 'required';
-    if (!formData.email) newErrors.email = 'required';
+    
+    // China: Phone required, Email optional
+    // Other countries: Email required, Phone optional
+    if (isChina) {
+      if (!formData.phoneNumber) newErrors.phoneNumber = 'required';
+      // Email is optional for China
+    } else {
+      if (!formData.email) newErrors.email = 'required';
+      // Phone is optional for other countries
+    }
+    
     if (!formData.username) newErrors.username = 'required';
     if (!formData.givenName) newErrors.givenName = 'required';
     if (!formData.surname) newErrors.surname = 'required';
@@ -94,31 +106,47 @@ export default function Register() {
     onChangeText: (text: string) => void,
     placeholder: string,
     required: boolean = false,
-    keyboardType: 'default' | 'email-address' | 'numeric' = 'default'
-  ) => (
-    <View style={styles.fieldContainer}>
-      <View style={styles.labelContainer}>
-        <Text style={styles.label}>{label}</Text>
-        {required && <Text style={styles.requiredStar}>*</Text>}
+    keyboardType: 'default' | 'email-address' | 'numeric' = 'default',
+    fieldKey?: string // Add optional field key for error mapping
+  ) => {
+    // Map label to field key for error handling
+    const errorKey = fieldKey || (() => {
+      switch (label) {
+        case 'Phone Number': return 'phoneNumber';
+        case 'Email': return 'email';
+        case 'Username': return 'username';
+        case 'Given Name': return 'givenName';
+        case 'Surname': return 'surname';
+        case 'Street Address': return 'streetAddress';
+        default: return label.toLowerCase();
+      }
+    })();
+
+    return (
+      <View style={styles.fieldContainer}>
+        <View style={styles.labelContainer}>
+          <Text style={styles.label}>{label}</Text>
+          {required && <Text style={styles.requiredStar}>*</Text>}
+        </View>
+        <View style={styles.inputWrapper}>
+          <TextInput
+            style={styles.input}
+            value={value}
+            onChangeText={onChangeText}
+            placeholder={placeholder}
+            placeholderTextColor="#999"
+            keyboardType={keyboardType}
+          />
+          <TouchableOpacity style={styles.editIcon}>
+            <Text style={styles.editIconText}>✎</Text>
+          </TouchableOpacity>
+        </View>
+        {errors[errorKey] && (
+          <Text style={styles.errorText}>{errors[errorKey]}</Text>
+        )}
       </View>
-      <View style={styles.inputWrapper}>
-        <TextInput
-          style={styles.input}
-          value={value}
-          onChangeText={onChangeText}
-          placeholder={placeholder}
-          placeholderTextColor="#999"
-          keyboardType={keyboardType}
-        />
-        <TouchableOpacity style={styles.editIcon}>
-          <Text style={styles.editIconText}>✎</Text>
-        </TouchableOpacity>
-      </View>
-      {errors[label.toLowerCase()] && (
-        <Text style={styles.errorText}>{errors[label.toLowerCase()]}</Text>
-      )}
-    </View>
-  );
+    );
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -152,12 +180,24 @@ export default function Register() {
           </View>
         </View>
 
+        {/* Country-specific validation info */}
+        {formData.country && (
+          <View style={styles.validationInfo}>
+            <Text style={styles.validationText}>
+              {formData.country === '44' 
+                ? 'For China: Phone number is required, email is optional'
+                : 'Phone number is optional, email is required'
+              }
+            </Text>
+          </View>
+        )}
+
         {renderField(
           'Phone Number',
           formData.phoneNumber,
           (text) => setFormData(prev => ({ ...prev, phoneNumber: text })),
-          'Click to Enter (Optional)',
-          false,
+          formData.country === 'CN' ? 'Click to Enter (Required)' : 'Click to Enter (Optional)',
+          formData.country === 'CN', // Required for China
           'numeric'
         )}
 
@@ -165,8 +205,8 @@ export default function Register() {
           'Email',
           formData.email,
           (text) => setFormData(prev => ({ ...prev, email: text })),
-          'Click to Enter (Required)',
-          true,
+          formData.country === 'CN' ? 'Click to Enter (Optional)' : 'Click to Enter (Required)',
+          formData.country !== 'CN', // Required for non-China countries
           'email-address'
         )}
 
@@ -266,7 +306,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
   },
   picker: {
-    height: 50,
+    height: 60,
     width: '100%',
   },
   editIcon: {
@@ -280,6 +320,20 @@ const styles = StyleSheet.create({
     color: '#ff0000',
     fontSize: 12,
     marginTop: 4,
+  },
+  validationInfo: {
+    backgroundColor: '#e8f4f8',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: '#007bff',
+  },
+  validationText: {
+    color: '#006699',
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
   },
   submitButton: {
     marginTop: 20,

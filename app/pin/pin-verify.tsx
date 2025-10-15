@@ -58,15 +58,7 @@ const Screen = () => {
 
   const handlePinReset = async () => {
     try {
-      // Clear PIN and verification status
-      await AsyncStorage.multiRemove([
-        'userPIN',
-        'pinVerified',
-        'lastPinVerification'
-      ]);
-      
-      // Navigate to PIN setup
-      router.replace('/pin/pin-setup');
+      await authService.logout();
     } catch (error) {
       console.error('Error resetting PIN:', error);
     }

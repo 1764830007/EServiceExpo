@@ -2,21 +2,88 @@ import { useColorScheme } from "@/hooks/use-color-scheme";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useEffect, useRef } from "react";
-import { AppState, AppStateStatus } from 'react-native';
+import { useEffect, useRef, useState } from "react";
+import { ActivityIndicator, AppState, AppStateStatus, View } from 'react-native';
 // import 'react-native-reanimated';
 import LanguageProvider from "@/hooks/locales/LanguageContext";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from './contexts/ThemeContext';
-export const unstable_settings = {
-  anchor: "(tabs)",
-};
 
 function RouteProtection({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const appState = useRef<AppStateStatus>(AppState.currentState);
+  const [initialAuthCheck, setInitialAuthCheck] = useState(false);
+
+  // Initial auth check to prevent index page flash
+  useEffect(() => {
+    const performInitialAuthCheck = async () => {
+      try {
+        const [authToken, isLoggedInStored, userPIN, pinVerified] = await Promise.all([
+          AsyncStorage.getItem('authToken'),
+          AsyncStorage.getItem('isLoggedIn'),
+          AsyncStorage.getItem('userPIN'),
+          AsyncStorage.getItem('pinVerified')
+        ]);
+
+        const hasAuth = !!(authToken && isLoggedInStored === 'true');
+        const hasPIN = !!userPIN;
+        const isPinVerified = pinVerified === 'true';
+
+        console.log('Initial auth check:', { hasAuth, hasPIN, isPinVerified, segments });
+
+        // Check if already on the intended page to prevent unnecessary redirects
+        const inAuthGroup = segments[0] === 'User';
+
+        // Determine where to navigate based on auth state
+        if (!hasAuth) {
+          // No authentication - go to login (only if not already there)
+          if (!inAuthGroup) {
+            console.log('No auth - navigating to login');
+            router.replace('/User/login');
+          } else {
+            console.log('No auth but already in auth group - staying');
+          }
+        } else if (!hasPIN) {
+          // Has auth but no PIN - go to PIN setup (only if not already there)
+          const inPinSetup = segments[0] === 'pin' && segments[1] === 'pin-setup';
+          if (!inPinSetup) {
+            console.log('Has auth, no PIN - navigating to PIN setup');
+            router.replace('/pin/pin-setup');
+          } else {
+            console.log('Has auth, no PIN but already in PIN setup - staying');
+          }
+        } else if (!isPinVerified) {
+          // Has auth and PIN but not verified - go to PIN verify (only if not already there)
+          const inPinVerify = segments[0] === 'pin' && segments[1] === 'pin-verify';
+          if (!inPinVerify) {
+            console.log('Has auth and PIN, not verified - navigating to PIN verify');
+            router.replace('/pin/pin-verify');
+          } else {
+            console.log('Has auth and PIN, not verified but already in PIN verify - staying');
+          }
+        } else {
+          // Fully authenticated - go to main app (only if not already there)
+          const inTabsGroup = segments[0] === '(tabs)';
+          if (!inTabsGroup) {
+            console.log('Fully authenticated - navigating to tabs');
+            router.replace('/(tabs)');
+          } else {
+            console.log('Fully authenticated and already in tabs - staying');
+          }
+        }
+
+        setInitialAuthCheck(true);
+      } catch (error) {
+        console.error('Initial auth check error:', error);
+        router.replace('/User/login');
+        setInitialAuthCheck(true);
+      }
+    };
+
+    performInitialAuthCheck();
+  }, []);
 
   // Handle app state changes (foreground/background)
   useEffect(() => {
@@ -46,10 +113,28 @@ function RouteProtection({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (isLoggedIn === null) return;
+    if (isLoggedIn === null || !initialAuthCheck) return;
 
     const checkPinStatus = async () => {
       try {
+        const inAuthGroup = segments[0] === 'User';
+        const inTabsGroup = segments[0] === '(tabs)';
+        const inPinSetup = segments[0] === 'pin' && segments[1] === 'pin-setup';
+        const inPinVerify = segments[0] === 'pin' && segments[1] === 'pin-verify';
+
+        // Skip route protection completely for PIN setup page
+        if (inPinSetup) {
+          console.log('In PIN setup - skipping route protection');
+          return;
+        }
+
+        // If user lands on index/tabs without being authenticated, redirect to login
+        if (inTabsGroup && !isLoggedIn) {
+          console.log('User on tabs without authentication - redirecting to login');
+          router.replace('/User/login');
+          return;
+        }
+
         const [authToken, userPIN, pinVerified, lastVerification] = await Promise.all([
           AsyncStorage.getItem('authToken'),
           AsyncStorage.getItem('userPIN'),
@@ -66,11 +151,6 @@ function RouteProtection({ children }: { children: React.ReactNode }) {
           ? Date.now() - new Date(lastVerification).getTime() > 24 * 60 * 60 * 1000
           : true;
 
-        const inAuthGroup = segments[0] === 'User';
-        const inTabsGroup = segments[0] === '(tabs)';
-        const inPinSetup = segments[0] === 'pin' && segments[1] === 'pin-setup';
-        const inPinVerify = segments[0] === 'pin' && segments[1] === 'pin-verify';
-
         console.log("Route protection:", { 
           isLoggedIn, 
           segments, 
@@ -80,8 +160,17 @@ function RouteProtection({ children }: { children: React.ReactNode }) {
           pinExpired
         });
 
+        // Priority check: If user is not logged in (logout scenario), redirect to login immediately
+        if (!isLoggedIn) {
+          console.log('User not logged in - redirecting to login');
+          if (!inAuthGroup) {
+            router.replace('/User/login');
+          }
+          return;
+        }
+
         // If user has auth token but no PIN, redirect to PIN setup
-        if (hasAuthToken && !hasPIN && !inPinSetup && !inAuthGroup) {
+        if (hasAuthToken && !hasPIN && !inAuthGroup) {
           console.log('Redirecting to PIN setup');
           router.replace('/pin/pin-setup');
           return;
@@ -97,18 +186,10 @@ function RouteProtection({ children }: { children: React.ReactNode }) {
 
         // If user has auth token and PIN but is verified and not expired,
         // still require PIN verification if not in tabs (app first start)
-        // BUT skip this if user is coming from PIN setup
-        if (hasAuthToken && hasPIN && isPinVerified && !pinExpired && !inTabsGroup && !inPinVerify && !inAuthGroup && !inPinSetup) {
+        if (hasAuthToken && hasPIN && isPinVerified && !pinExpired && !inTabsGroup && !inPinVerify && !inAuthGroup) {
           console.log('App first start - requiring PIN verification');
           await AsyncStorage.removeItem('pinVerified');
           router.replace('/pin/pin-verify');
-          return;
-        }
-
-        // If user is not logged in and not in auth flow, redirect to login
-        if (!isLoggedIn && !inAuthGroup && !inPinSetup && !inPinVerify) {
-          console.log('Redirecting to login');
-          router.replace('/User/login');
           return;
         }
 
@@ -125,10 +206,23 @@ function RouteProtection({ children }: { children: React.ReactNode }) {
     };
 
     checkPinStatus();
-  }, [isLoggedIn, segments]);
+  }, [isLoggedIn, segments, initialAuthCheck]);
+
+  // Show loading screen during initial auth check to prevent index page flash
+  if (!initialAuthCheck) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
 
   if (isLoggedIn === null) {
-    return null;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
   }
 
   return <>{children}</>;
@@ -143,6 +237,7 @@ export default function RootLayout() {
         <AuthProvider>
           <RouteProtection>
             <Stack screenOptions={{animation: "ios_from_right"}}>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="User" options={{ headerShown: false }} />
               <Stack.Screen name="pin/pin-setup" options={{ headerShown: false }} />

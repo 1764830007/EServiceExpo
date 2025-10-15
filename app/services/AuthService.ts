@@ -1,5 +1,8 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
+import { NativeEventEmitter, NativeModules, Platform } from 'react-native';
+
+// Create event emitter for auth events
+export const authEvents = new NativeEventEmitter(NativeModules.AuthModule || {});
 
 interface CallBackInfo {
   UserLoginName: string;
@@ -174,6 +177,14 @@ class AuthService {
       } else {
         console.log('✅ All auth keys successfully removed');
       }
+
+      // Emit logout event to notify AuthContext
+      authEvents.emit('logout', {
+        timestamp: new Date().toISOString(),
+        reason: 'manual_logout'
+      });
+      console.log('📢 Logout event emitted');
+
     } catch (error) {
       console.error('❌ Logout error:', error);
       throw error;

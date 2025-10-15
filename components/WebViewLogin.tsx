@@ -13,10 +13,10 @@ import {
   View,
 } from 'react-native';
 import { WebView, WebViewMessageEvent, WebViewNavigation } from 'react-native-webview';
-import { Consts } from '../../constants/config';
-import { useAuth } from '../contexts/AuthContext';
-import authService from '../services/AuthService';
-import { loginEvents } from '../User/login';
+import { useAuth } from '../app/contexts/AuthContext';
+import authService from '../app/services/AuthService';
+import { loginEvents } from '../app/User/login';
+import { Consts } from '../constants/config';
 
 interface WebViewLoginProps {
   visible: boolean;

@@ -4,7 +4,6 @@ import { router } from 'expo-router';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import { Consts } from '../../constants/config';
 import AuthService from './AuthService';
-
 // Create event emitter for auth-related events
 export const loginEvents = new NativeEventEmitter(NativeModules.AuthModule || {});
 
@@ -189,7 +188,7 @@ api.interceptors.response.use(
               error: error.message,
               timestamp: new Date().toISOString()
             });
-
+            
             router.replace('/User/login');
           } catch (emergencyError) {
             console.error('❌ Emergency cleanup failed:', emergencyError);

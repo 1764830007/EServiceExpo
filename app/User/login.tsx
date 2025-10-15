@@ -8,7 +8,7 @@ import {
   View,
 } from 'react-native';
 import { Button } from 'react-native-paper';
-import WebViewLogin from '../components/WebViewLogin';
+import WebViewLogin from '../../components/WebViewLogin';
 
 /**
  * Event emitter for login-related events across components.

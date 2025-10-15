@@ -119,7 +119,7 @@ export default function EquipmentManageList() {
           </View>
         </View>
         {/* 全部，已连接，为连接 tabs */}
-        <View style={{ marginTop: 20 }}>
+        <View style={{ flex: 1, marginTop: 20 }}>
           <SegmentedButtons
             theme={{ colors: { secondaryContainer: "white" } }}
             style={{ borderRadius: 10, backgroundColor: "#e3e3e3" }}
@@ -146,7 +146,7 @@ export default function EquipmentManageList() {
               },
             ]}
           />
-          {selectedTab === "all" && (
+            {selectedTab === "all" && (
             <FlatList
               data={equipments.data}
               renderItem={({ item }) => <EquipmentCard equip={item} />}
@@ -175,6 +175,7 @@ export default function EquipmentManageList() {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
     backgroundColor: "#f6f6f6",
     paddingHorizontal: 15,
   },

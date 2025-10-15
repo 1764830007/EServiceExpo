@@ -90,7 +90,6 @@ export default function EquipmentCardDetail() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    height: '100%'
   },
   content: {
     flex: 1,
@@ -109,22 +108,5 @@ const styles = StyleSheet.create({
   labelTab: {
     fontSize: 10,
     fontWeight: 300
-  },
-  webviewContainer: {
-    flex: 1,
-    height: 500, 
-    marginTop: 20,
-  },
-  webview: {
-    flex: 1,
-    height: '100%',
-  },
-  section: {
-    flex: 1,
-    marginTop: 20,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    marginBottom: 10,
   }
 });

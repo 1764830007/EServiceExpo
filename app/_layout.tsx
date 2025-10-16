@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, AppState, AppStateStatus, View } from 'react-native';
 // import 'react-native-reanimated';
 import LanguageProvider from "@/hooks/locales/LanguageContext";
+import { Consts } from "../constants/config";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -54,14 +55,23 @@ function RouteProtection({ children }: { children: React.ReactNode }) {
           } else {
             console.log('Has auth, no PIN but already in PIN setup - staying');
           }
-        } else if (!isPinVerified) {
+        } else if (!isPinVerified && !Consts.Config.SkipPin) {
           // Has auth and PIN but not verified - go to PIN verify (only if not already there)
+          // Skip PIN verification if SkipPin config is true
           const inPinVerify = segments[0] === 'pin' && segments[1] === 'pin-verify';
           if (!inPinVerify) {
             console.log('Has auth and PIN, not verified - navigating to PIN verify');
             router.replace('/pin/pin-verify');
           } else {
             console.log('Has auth and PIN, not verified but already in PIN verify - staying');
+          }
+        } else if (!isPinVerified && Consts.Config.SkipPin) {
+          // SkipPin is enabled, treat as if PIN is verified
+          console.log('SkipPin enabled - bypassing PIN verification');
+          const inTabsGroup = segments[0] === '(tabs)';
+          if (!inTabsGroup) {
+            console.log('Fully authenticated (PIN skipped) - navigating to tabs');
+            router.replace('/(tabs)');
           }
         } else {
           // Fully authenticated - go to main app (only if not already there)
@@ -97,11 +107,13 @@ function RouteProtection({ children }: { children: React.ReactNode }) {
           AsyncStorage.getItem('userPIN')
         ]);
 
-        if (authToken && userPIN) {
+        if (authToken && userPIN && !Consts.Config.SkipPin) {
           console.log('App resumed - clearing PIN verification and redirecting to PIN verify');
           await AsyncStorage.removeItem('pinVerified');
           // Immediately redirect to PIN verification
           router.replace('/pin/pin-verify');
+        } else if (authToken && userPIN && Consts.Config.SkipPin) {
+          console.log('App resumed - SkipPin enabled, staying in current view');
         }
       }
       
@@ -169,24 +181,24 @@ function RouteProtection({ children }: { children: React.ReactNode }) {
           return;
         }
 
-        // If user has auth token but no PIN, redirect to PIN setup
-        if (hasAuthToken && !hasPIN && !inAuthGroup) {
+        // If user has auth token but no PIN, redirect to PIN setup (unless SkipPin is enabled)
+        if (hasAuthToken && !hasPIN && !inAuthGroup && !Consts.Config.SkipPin) {
           console.log('Redirecting to PIN setup');
           router.replace('/pin/pin-setup');
           return;
         }
 
-        // If user has PIN but not verified (or expired), redirect to PIN verify
+        // If user has PIN but not verified (or expired), redirect to PIN verify (unless SkipPin is enabled)
         // Also require PIN verification on app start even if previously verified
-        if (hasAuthToken && hasPIN && (!isPinVerified || pinExpired) && !inPinVerify && !inAuthGroup) {
+        if (hasAuthToken && hasPIN && (!isPinVerified || pinExpired) && !inPinVerify && !inAuthGroup && !Consts.Config.SkipPin) {
           console.log('Redirecting to PIN verification');
           router.replace('/pin/pin-verify');
           return;
         }
 
         // If user has auth token and PIN but is verified and not expired,
-        // still require PIN verification if not in tabs (app first start)
-        if (hasAuthToken && hasPIN && isPinVerified && !pinExpired && !inTabsGroup && !inPinVerify && !inAuthGroup) {
+        // still require PIN verification if not in tabs (app first start) (unless SkipPin is enabled)
+        if (hasAuthToken && hasPIN && isPinVerified && !pinExpired && !inTabsGroup && !inPinVerify && !inAuthGroup && !Consts.Config.SkipPin) {
           console.log('App first start - requiring PIN verification');
           await AsyncStorage.removeItem('pinVerified');
           router.replace('/pin/pin-verify');

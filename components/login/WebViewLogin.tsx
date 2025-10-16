@@ -13,19 +13,19 @@ import {
   View,
 } from 'react-native';
 import { WebView, WebViewMessageEvent, WebViewNavigation } from 'react-native-webview';
-import { useAuth } from '../app/contexts/AuthContext';
-import authService from '../app/services/AuthService';
-import { loginEvents } from '../app/User/login';
-import { Consts } from '../constants/config';
+import { useAuth } from '../../app/contexts/AuthContext';
+import { loginEvents } from '../../app/User/login';
+import { Consts } from '../../constants/config';
 
 interface WebViewLoginProps {
   visible: boolean;
   onClose: () => void;
   onLoginSuccess?: () => void;
   onLoginError?: (error: string) => void;
+  initialUrl?: string; // Optional custom URL for registration flows
 }
 
-export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLoginError }: WebViewLoginProps) {
+export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLoginError, initialUrl }: WebViewLoginProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [webviewLoading, setWebviewLoading] = useState<boolean>(false);
   const [authUrl, setAuthUrl] = useState<string>('');
@@ -54,89 +54,12 @@ export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLogin
     };
   }, [onLoginError]);
 
-  // Handle token received in URL
-  const handleTokenFromUrl = useCallback(
-    async (url: string) => {
-      try {
-        const parsed = new URL(url);
-        const token = parsed.searchParams.get('token');
-        const user = parsed.searchParams.get('user') || '';
-        const errorMessage = parsed.searchParams.get('error');
-        
-        if (errorMessage) {
-          onLoginError?.(decodeURIComponent(errorMessage));
-          return false;
-        }
-        
-        if (!token) {
-          onLoginError?.('No token received from authentication server');
-          return false;
-        }
-
-        // Create CallBackInfo from response
-        const callBackInfo = {
-          UserLoginName: user,
-          Token: token,
-          RefreshToken: parsed.searchParams.get('refresh_token') || '',
-          TokenExpiration: '3600',
-          RefreshTokenExpiration: '2592000',
-        };
-
-        try {
-          // Store auth data first
-          await authService.login(callBackInfo);
-          
-          // Verify token storage
-          const storedToken = await AsyncStorage.getItem('authToken');
-          console.log('Token storage verification:', {
-            tokenReceived: !!callBackInfo.Token,
-            tokenStored: !!storedToken,
-            tokenMatch: storedToken === callBackInfo.Token
-          });
-          
-          if (!storedToken || storedToken !== callBackInfo.Token) {
-            throw new Error('Token storage verification failed');
-          }
-          
-          // Set the login state in AuthContext
-          await login();
-          
-          // Check if PIN is needed
-          const pinStored = await AsyncStorage.getItem('userPIN');
-          if (!pinStored) {
-            router.push('/pin-setup');
-            return true;
-          }
-
-          // Notify other components about user change
-          loginEvents.emit('userChanged', true);
-
-          // Close WebView and notify success
-          onClose();
-          onLoginSuccess?.();
-          return true;
-        } catch (loginError) {
-          onLoginError?.('Failed to save login credentials');
-          console.error('Login service error:', loginError);
-          return false;
-        }
-      } catch (err) {
-        console.error('Failed to parse token url:', err);
-        onLoginError?.('Invalid response from authentication server');
-        return false;
-      } finally {
-        setLoading(false);
-      }
-    },
-    [router, login, onClose, onLoginSuccess, onLoginError],
-  );
-
   // Handle WebView messages
   const handleMessage = useCallback(async (event: WebViewMessageEvent) => {
     try {
-      console.log('[Message] Received WebView message', event.nativeEvent);
+      //console.log('[Message] Received WebView message', event.nativeEvent);
       const data = JSON.parse(event.nativeEvent.data);
-      console.log('[Message] Message type:', data.type);
+      //console.log('[Message] Message type:', data.type);
 
       if (data.type === 'debug') {
         console.log('[Debug] WebView state:', data.value);
@@ -173,25 +96,14 @@ export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLogin
         console.log('[CallBackInfo] Processing login data:', JSON.stringify(callBackInfo, null, 2));
         
         try {
-          // Handle the login
-          await authService.login(callBackInfo);
+          // Store the callback info temporarily for PIN setup to use
+          await AsyncStorage.setItem('pendingLoginInfo', JSON.stringify(callBackInfo));
           
-          // Set the login state in AuthContext
-          await login();
-          
-          // Verify token storage
-          const storedToken = await AsyncStorage.getItem('authToken');
-          console.log('[Storage] Token stored successfully:', storedToken ? 'Yes' : 'No');
-          
-          // Verify refresh token storage
-          const storedRefreshToken = await AsyncStorage.getItem('refreshToken');
-          console.log('[Storage] Refresh token stored:', storedRefreshToken ? 'Yes' : 'No');
-          
-          console.log('[Navigation] Login successful');
+          console.log('[Navigation] Stored callback info, navigating to PIN setup');
           onClose();
-          onLoginSuccess?.();
+          router.push('/pin/pin-setup');
         } catch (error) {
-          console.error('[Error] Login error:', error);
+          console.error('[Error] Failed to store callback info:', error);
           onLoginError?.('Failed to process login data');
         }
       }
@@ -212,7 +124,6 @@ export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLogin
       // Wait for a moment to ensure the page is fully loaded
       setTimeout(() => {
         if (webViewRef.current) {
-          console.log('[WebView] Injecting JavaScript to check variables');
           webViewRef.current.injectJavaScript(`
             (function() {
               try {
@@ -268,12 +179,7 @@ export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLogin
   // Handle WebView load requests
   const onShouldStartLoadWithRequest = useCallback((request: any) => {
     const { url, mainDocumentURL } = request;
-    console.log('WebView navigating to:', url);
-    if (url && url.includes('token=')) {
-      handleTokenFromUrl(url);
-      console.log('Token found in URL, handling token and stopping navigation.');
-      return true;
-    }
+    //console.log('[Navigation] onShouldStartLoadWithRequest:', request);
 
     if (url === authUrl) return true;
     
@@ -295,17 +201,24 @@ export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLogin
 
     console.log('Blocking navigation to:', url);
     return true;
-  }, [authUrl, handleTokenFromUrl]);
+  }, [authUrl]);
 
   // Initialize the login URL when the WebView becomes visible
   React.useEffect(() => {
     if (visible) {
-      const baseLogin = Consts.Config.LoginUrl || `https://${Consts.Config.Host}/Login/GetB2CLogin?isFromMobile=true`;
-      const AUTH_URL = `${baseLogin}&isDarkMode=true`;
-      setLoading(true);
-      setAuthUrl(AUTH_URL);
+      if (initialUrl) {
+        // Use the provided initial URL (e.g., for registration flows)
+        setLoading(true);
+        setAuthUrl(initialUrl);
+      } else {
+        // Use the default login URL
+        const baseLogin = Consts.Config.LoginUrl || `https://${Consts.Config.Host}/Login/GetB2CLogin?isFromMobile=true`;
+        const AUTH_URL = `${baseLogin}&isDarkMode=true`;
+        setLoading(true);
+        setAuthUrl(AUTH_URL);
+      }
     }
-  }, [visible]);
+  }, [visible, initialUrl]);
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -329,12 +242,12 @@ export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLogin
           onMessage={handleMessage}
           onLoadStart={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
-            console.log('[WebView] Start loading:', nativeEvent.url);
+            //console.log('[WebView] Start loading:', nativeEvent.url);
             setWebviewLoading(true);
           }}
           onLoadEnd={(syntheticEvent) => {
             const { nativeEvent } = syntheticEvent;
-            console.log('[WebView] Finished loading:', nativeEvent.url);
+            //console.log('[WebView] Finished loading:', nativeEvent.url);
             setWebviewLoading(false);
             
             // Test message channel

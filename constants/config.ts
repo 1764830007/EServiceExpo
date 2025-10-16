@@ -40,6 +40,7 @@ export const Consts = {
     LogoutUrl: `https://${Host}/Oauth_Redirect_ECApp/Logout`,
     CallbackUrl: `https://${Host}/response-oidc`,
     LearnmoreUrl: 'https://www.semmachinery.com/',
+    SkipPin:true,
     BaseUrl: `https://${Host}/ecapi/api`,
     BaseH5Url: EnvUsing.includes('Dev')  ? (IsPrefix ? `https://${Host}/DCP_Web/ECPrefix/#` : `https://${Host}/DCP_Web/EC/#`) : `https://${Host}/ecservice/#`,
     H5LoadingQuery: '/#/?clientId={loginName}&userType={userType}&secret={token}',

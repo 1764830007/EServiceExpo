@@ -113,77 +113,77 @@ export default function Index() {
   };
 
   // 获取设备列表数据 - 使用原生fetch API
-  const fetchEquipments = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEzNiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJDUUxfSmVyZW15bWFvIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoieGluX21hb0AxNjMuY29tIiwiQXNwTmV0LklkZW50aXR5LlNlY3VyaXR5U3RhbXAiOiIzNDQ4ZWFiMS0zYWNkLTNiZDgtZDU0Yi0zOWZhMjUxYjYyMGMiLCJzdWIiOiIxMzYiLCJqdGkiOiI4OWVkOTliMy05Yzc1LTRiYWItYmIxOS04NmY1ZGQ0MTY2NzAiLCJpYXQiOjE3NjAzNDM1ODYsIlNlc3Npb24uTWFpbkRlYWxlckNvZGUiOiJZMTRBIiwibmJmIjoxNzYwMzQzNTg2LCJleHAiOjE3NjA0Mjk5ODYsImlzcyI6IkRDUCIsImF1ZCI6IkRDUCJ9.7VBQftmhBLlx6XOkSAlv9dkvsmPyRN0WHu__sXWv6ek';
+  // const fetchEquipments = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjEzNiIsImh0dHA6Ly9zY2hlbWFzLnhtbHNvYXAub3JnL3dzLzIwMDUvMDUvaWRlbnRpdHkvY2xhaW1zL25hbWUiOiJDUUxfSmVyZW15bWFvIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvZW1haWxhZGRyZXNzIjoieGluX21hb0AxNjMuY29tIiwiQXNwTmV0LklkZW50aXR5LlNlY3VyaXR5U3RhbXAiOiIzNDQ4ZWFiMS0zYWNkLTNiZDgtZDU0Yi0zOWZhMjUxYjYyMGMiLCJzdWIiOiIxMzYiLCJqdGkiOiI4OWVkOTliMy05Yzc1LTRiYWItYmIxOS04NmY1ZGQ0MTY2NzAiLCJpYXQiOjE3NjAzNDM1ODYsIlNlc3Npb24uTWFpbkRlYWxlckNvZGUiOiJZMTRBIiwibmJmIjoxNzYwMzQzNTg2LCJleHAiOjE3NjA0Mjk5ODYsImlzcyI6IkRDUCIsImF1ZCI6IkRDUCJ9.7VBQftmhBLlx6XOkSAlv9dkvsmPyRN0WHu__sXWv6ek';
 
-      console.log('开始设备列表API请求...');
+  //     console.log('开始设备列表API请求...');
 
-      const response = await fetch('https://dcpqa.semdcp.com/api/services/app/EquipmentService/Equipments', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          limit: 2,
-          offset: 0
-        })
-      });
+  //     const response = await fetch('https://dcpqa.semdcp.com/api/services/app/EquipmentService/Equipments', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //         'Authorization': `Bearer ${token}`
+  //       },
+  //       body: JSON.stringify({
+  //         limit: 2,
+  //         offset: 0
+  //       })
+  //     });
 
-      console.log('API响应状态:', response.status, response.statusText);
+  //     console.log('API响应状态:', response.status, response.statusText);
 
-      if (!response.ok) {
-        throw new Error(`HTTP错误! 状态码: ${response.status}, 状态文本: ${response.statusText}`);
-      }
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP错误! 状态码: ${response.status}, 状态文本: ${response.statusText}`);
+  //     }
 
-      const data = await response.json();
-      console.log('设备列表数据:', data);
+  //     const data = await response.json();
+  //     console.log('设备列表数据:', data);
 
-      // 根据API响应结构处理数据
-      if (data && data.result && Array.isArray(data.result.data)) {
-        const equipmentList: Equipment[] = data.result.data.map((item: any, index: number) => ({
-          id: item.serialNumber || Math.random().toString(),
-          serialNumber: item.serialNumber || 'N/A',
-          equipmentModel: item.equipmentModel || '未知型号',
-          nameNote: item.nameNote,
-          equipmentType: item.equipmentType || '未知类型',
-          boundStatus: item.boundStatus || false,
-          customer: item.customer,
-          dealerCode: item.dealerCode || 'N/A',
-          location: item.location || '未知位置',
-          totalHours: item.totalHours || 0,
-          locationTime: item.locationTime || '未知时间',
-          status: item.status || '未知状态',
-          connect: item.connect || 0,
-          isFault: item.isFault || '0'
-        }));
-        setEquipments(equipmentList);
-        console.log('成功设置设备列表:', equipmentList.length, '条记录');
-      } else {
-        setEquipments([]);
-        console.log('API返回数据格式不正确或为空');
-      }
-    } catch (err: any) {
-      const errorMessage = err.message || '获取设备列表失败';
-      setError(errorMessage);
-      console.error('设备列表API请求失败:', err);
-      console.error('错误详情:', {
-        message: err.message,
-        name: err.name,
-        stack: err.stack
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     // 根据API响应结构处理数据
+  //     if (data && data.result && Array.isArray(data.result.data)) {
+  //       const equipmentList: Equipment[] = data.result.data.map((item: any, index: number) => ({
+  //         id: item.serialNumber || Math.random().toString(),
+  //         serialNumber: item.serialNumber || 'N/A',
+  //         equipmentModel: item.equipmentModel || '未知型号',
+  //         nameNote: item.nameNote,
+  //         equipmentType: item.equipmentType || '未知类型',
+  //         boundStatus: item.boundStatus || false,
+  //         customer: item.customer,
+  //         dealerCode: item.dealerCode || 'N/A',
+  //         location: item.location || '未知位置',
+  //         totalHours: item.totalHours || 0,
+  //         locationTime: item.locationTime || '未知时间',
+  //         status: item.status || '未知状态',
+  //         connect: item.connect || 0,
+  //         isFault: item.isFault || '0'
+  //       }));
+  //       setEquipments(equipmentList);
+  //       console.log('成功设置设备列表:', equipmentList.length, '条记录');
+  //     } else {
+  //       setEquipments([]);
+  //       console.log('API返回数据格式不正确或为空');
+  //     }
+  //   } catch (err: any) {
+  //     const errorMessage = err.message || '获取设备列表失败';
+  //     setError(errorMessage);
+  //     console.error('设备列表API请求失败:', err);
+  //     console.error('错误详情:', {
+  //       message: err.message,
+  //       name: err.name,
+  //       stack: err.stack
+  //     });
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // 页面加载时获取数据
   useEffect(() => {
     fetchDashboardData();
-    fetchEquipments();
+    //fetchEquipments();
     fetchCarouselData();
     // 获取用户登录名
     const getUserName = async () => {
@@ -204,7 +204,7 @@ export default function Index() {
 
   // 刷新设备列表
   const handleRefresh = () => {
-    fetchEquipments();
+    //fetchEquipments();
   };
 
   const handleAddDeviceClick = () => {

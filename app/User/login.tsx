@@ -8,7 +8,8 @@ import {
   View,
 } from 'react-native';
 import { Button } from 'react-native-paper';
-import WebViewLogin from '../../components/WebViewLogin';
+import WebViewLogin from '../../components/login/WebViewLogin';
+import { useLocalization } from '../../hooks/locales/LanguageContext';
 
 /**
  * Event emitter for login-related events across components.
@@ -25,28 +26,29 @@ export const loginEvents = new NativeEventEmitter();
  */
 export default function Login() {
   const [showWebView, setShowWebView] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>('');
   const router = useRouter();
+  const { t } = useLocalization();
 
   const handleLogin = () => {
-    setLoading(true);
     setShowWebView(true);
   };
 
   const handleLoginSuccess = () => {
-    setLoading(false);
-    router.push('/');
+    // Login success handled by WebView component
   };
 
   const handleLoginError = (errorMessage: string) => {
     setError(errorMessage);
-    setLoading(false);
+  };
+
+  const handleWebViewClose = () => {
+    setShowWebView(false);
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.brandText}>A Caterpillar Brand</Text>
+      <Text style={styles.brandText}>{t('app.CaterpillarBrand')}</Text>
 
       {error ? (
         <View style={styles.errorContainer}>
@@ -63,32 +65,30 @@ export default function Login() {
           mode="contained"
           style={styles.loginButton}
           buttonColor="orange"
-          loading={loading}
-          disabled={loading}
         >
-          {loading ? '登录中...' : '登录'}
+          {t('auth.Login')}
         </Button>
       </View>
 
       <View style={styles.registerContainer}>
-        <Text>Don't have an account? </Text>
-        <Link href="/User/register" style={styles.registerLink}>Create Account</Link>
+        <Text>{t('auth.DontHaveAccount')} </Text>
+        <Link href="/User/register" style={styles.registerLink}>{t('auth.CreateAccount')}</Link>
       </View>
 
-      <Text style={styles.glaxText}>Or</Text>
-      <Text style={styles.glaxText}>RECOMMEND TO USE WECHAT TO LOGIN QUICKLY</Text>
+      <Text style={styles.glaxText}>{t('auth.Or')}</Text>
+      <Text style={styles.glaxText}>{t('auth.RecommendToUseWechat')}</Text>
       <Button
         mode="contained"
         style={styles.wechatButton}
         buttonColor="#07C160"
         onPress={() => console.log('微信登录')}
       >
-        WECHAT LOGIN
+        {t('auth.WeChatLogin')}
       </Button>
 
       <WebViewLogin
         visible={showWebView}
-        onClose={() => setShowWebView(false)}
+        onClose={handleWebViewClose}
         onLoginSuccess={handleLoginSuccess}
         onLoginError={handleLoginError}
       />

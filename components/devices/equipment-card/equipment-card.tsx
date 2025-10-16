@@ -10,6 +10,7 @@ interface CardProps {
 
 export default function EquipmentCard({ equip }: CardProps) {
   const router = useRouter();
+  
   return (
     <Card
       mode="contained"

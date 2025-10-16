@@ -1,17 +1,41 @@
+import { GetEquipDetail } from "@/app/services/equipments/EquipmentService";
 import BasicData from "@/components/devices/equipment-card-detail/basic-data";
 import MaintainRecord from "@/components/devices/equipment-card-detail/maintain-record";
 import RealTimeData from "@/components/devices/equipment-card-detail/realtime-data";
+import equipmentDetailStore from "@/hooks/equipments/EquipmentDetailStore";
 import { useLocalization } from "@/hooks/locales/LanguageContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Appbar, SegmentedButtons } from "react-native-paper";
+
+type SelectedTab = 'realtimeData' | 'useAnalysis' | 'basicData' | 'maintainRecord';
 
 export default function EquipmentCardDetail() {
   const { t } = useLocalization();
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const [selectedTab, setSelectedTab] = useState("realtimeData");
+  const equipDetailStore = equipmentDetailStore.useStore();
+  // const { equipDetail } = equipDetailStore;
+  const [selectedTab, setSelectedTab] = useState<SelectedTab>('realtimeData');
+
+  const loadEquipDetail = async() => {
+    const res = await GetEquipDetail(id as string);
+    console.log('load basic data section',res);
+    equipDetailStore.setEquipDetail(res);
+  }
+
+  useEffect(() => {
+    if(selectedTab === 'realtimeData') {
+      console.log('load realtime section');
+    }else if(selectedTab === 'useAnalysis') {
+      console.log('load use analysics');
+    }else if(selectedTab === 'basicData') {
+      loadEquipDetail();
+    }else if(selectedTab === 'maintainRecord') {
+      console.log('load maintain record');
+    }
+  }, [selectedTab]);
 
   return (
     <View style={styles.container}>
@@ -77,7 +101,7 @@ export default function EquipmentCardDetail() {
             <RealTimeData />
         ) }
         {selectedTab === 'basicData' && (
-          <BasicData />
+          <BasicData equipDetail={equipDetailStore.equipDetail} />
         ) }
         {selectedTab === 'maintainRecord' && (
           <MaintainRecord />

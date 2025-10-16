@@ -1,3 +1,4 @@
+import { EquipDetail } from "@/models/equipments/EquipmentDetail";
 import {
   DealerDto,
   EquipmentListDto,
@@ -38,5 +39,10 @@ return res.data.result;
 //  加载 位置
 export const LoadCountryOptions = async(type: number = 0) => {
   const res = await api.get<{ result: NationDto[] }>(`/services/app/GeoService/Nations?type=${type}`);
+  return res.data.result;
+}
+
+export const GetEquipDetail = async(serialNumber: string) => {
+  const res = await api.get<{ result: EquipDetail, success: boolean, error: string }>(`/services/app/EquipmentService/Equipment?SerialNumber=${serialNumber}`);
   return res.data.result;
 }

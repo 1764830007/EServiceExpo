@@ -13,7 +13,9 @@ const equipmentDetailStore = defineStore("equipmentDetailStore", {
   },
   lifecycle: {
     mounted() {},
-    willUnmount() {},
+    willUnmount() {
+      this.equipDetail = {} as EquipDetail;
+    },
   },
 });
 

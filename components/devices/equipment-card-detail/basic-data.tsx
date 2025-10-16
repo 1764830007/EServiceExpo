@@ -1,11 +1,16 @@
+import { UnBindEqiup } from "@/app/services/equipments/EquipmentService";
+import DialogX from "@/components/base/DialogX";
+import ModalX from "@/components/base/ModalX";
+import { useLocalization } from "@/hooks/locales/LanguageContext";
 import { EquipDetail } from "@/models/equipments/EquipmentDetail";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import {
   GestureHandlerRootView,
   ScrollView,
 } from "react-native-gesture-handler";
-import { Icon, Text } from "react-native-paper";
+import { Button, Icon, Text } from "react-native-paper";
 
 type DetailProps = {
   equipDetail: EquipDetail;
@@ -13,8 +18,36 @@ type DetailProps = {
 
 export default function BasicData({ equipDetail }: DetailProps) {
   const router = useRouter();
+  const { t } = useLocalization();
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalText, setModalText] = useState('');
+  const hideDialog = (hide: boolean) => {
+    setDialogVisible(hide);
+  };
+  const hideModal = (hide: boolean) => {
+    setModalVisible(hide);
+  };
+  //console.log("equip detail", equipDetail);
 
-  console.log("equip detail", equipDetail);
+  const unbindEquip = async() => {
+    try {
+      const res = await UnBindEqiup(equipDetail?.machineDto?.serialNumber);
+      if(res.success) {
+        setModalText(t('binding.EquipmentUnbindSuccess'));
+        setModalVisible(true);
+      }else {
+        setModalText(t('binding.EquipmentUnbindFail'));
+        setModalVisible(true);
+      }
+      //throw new Error("aaa");
+    }catch(e) {
+      console.log('unBindEquip', e);
+      // dialog of react native paper
+      setModalText(t('binding.EquipmentUnbindFail'));
+      setModalVisible(true);
+    }
+  };
 
   return (
     <GestureHandlerRootView>
@@ -142,7 +175,20 @@ export default function BasicData({ equipDetail }: DetailProps) {
               <Icon source="chevron-right" size={24} />
             </TouchableOpacity>
           </View>
+          {/* 申请解绑，修改设备详情 */}
+          <View style={{ marginTop: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+            <Button mode="contained" style={{borderRadius: 5}} onPress={() =>  setDialogVisible(true) }>申请解绑</Button>
+            <Button mode="contained" style={{borderRadius: 5}}>修改设备详情</Button>
+          </View>
       </ScrollView>
+      {/* 申请解绑对话框 */}
+      <DialogX DialogVisible={dialogVisible} 
+        hideDialog={ () => hideDialog(false) } confirmCallback={() => unbindEquip() }
+        >
+              <Text>{t('binding.EquipmentUnbindTips')}</Text> 
+      </DialogX>
+      <ModalX ModalVisible={modalVisible} hideModal={() => hideModal(false)} 
+        title={modalText} />
     </GestureHandlerRootView>
   );
 }

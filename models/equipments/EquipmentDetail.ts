@@ -56,5 +56,5 @@ export interface ConfigDto {
 export interface EquipDetail {
     machineDto:MachineDto;
     data: EquipData;
-    configDto: ConfigDto;
+    configDto: ConfigDto[];
 }

@@ -21,7 +21,7 @@ export default function EquipmentCardDetail() {
 
   const loadEquipDetail = async() => {
     const res = await GetEquipDetail(id as string);
-    console.log('load basic data section',res);
+    console.log('load basic data section');
     equipDetailStore.setEquipDetail(res);
   }
 
@@ -91,18 +91,22 @@ export default function EquipmentCardDetail() {
             },
           ]}
         />
+        {/* 实时数据 */}
         {selectedTab === 'realtimeData' && (
           <>
            <Text>real time data </Text>
             <RealTimeData />
           </>
-        ) }
+        )}
+        {/* 使用分析 */}
         {selectedTab === 'useAnalysis' && (
             <RealTimeData />
-        ) }
+        )}
+        {/* 基本信息 */}
         {selectedTab === 'basicData' && (
           <BasicData equipDetail={equipDetailStore.equipDetail} />
-        ) }
+        )}
+        {/* 维保记录 */}
         {selectedTab === 'maintainRecord' && (
           <MaintainRecord />
         )}

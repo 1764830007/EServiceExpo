@@ -41,8 +41,15 @@ export const LoadCountryOptions = async(type: number = 0) => {
   const res = await api.get<{ result: NationDto[] }>(`/services/app/GeoService/Nations?type=${type}`);
   return res.data.result;
 }
-
+// 获取设备基本信息
 export const GetEquipDetail = async(serialNumber: string) => {
   const res = await api.get<{ result: EquipDetail, success: boolean, error: string }>(`/services/app/EquipmentService/Equipment?SerialNumber=${serialNumber}`);
   return res.data.result;
 }
+// 申请解绑
+export const UnBindEqiup = async(serialNumber: string) => {
+  const res = await api.post<{success: boolean, error: string }>(`/services/app/EquipmentService/UnBindRequest`, {
+    serialNumber: serialNumber
+  });
+  return res.data;
+};

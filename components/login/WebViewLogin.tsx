@@ -124,7 +124,6 @@ export default function WebViewLogin({ visible, onClose, onLoginSuccess, onLogin
       // Wait for a moment to ensure the page is fully loaded
       setTimeout(() => {
         if (webViewRef.current) {
-          console.log('[WebView] Injecting JavaScript to check variables');
           webViewRef.current.injectJavaScript(`
             (function() {
               try {

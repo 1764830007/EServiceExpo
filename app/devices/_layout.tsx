@@ -8,7 +8,7 @@ export default function DeviceLayout() {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="devices/equipment-list/[id]"
+        name="devices/equipment-card-detail/[id]"
         options={{ headerShown: false }}
       />
       <Stack.Screen

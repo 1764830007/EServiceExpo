@@ -1,19 +1,20 @@
+import { EquipTypeImages } from "@/constants/EquipTypeImage";
 import { Equipments } from "@/models/equipments/EquipmentList";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useRouter } from 'expo-router';
-import { Text, View } from "react-native";
+import { Image, Text, View } from "react-native";
 import { Button, Card, Chip } from "react-native-paper";
-
 interface CardProps {
   equip: Equipments,
 }
 
 export default function EquipmentCard({ equip }: CardProps) {
   const router = useRouter();
+  console.log("equip card", equip);
   return (
     <Card
       mode="contained"
-      onPress={ () => router.push(`/devices/equipment-list/${equip.serialNumber}`)}
+      onPress={ () => router.push(`/devices/equipment-card-detail/${equip.serialNumber}`)}
       style={{ marginTop: 10, borderRadius: 5, backgroundColor: "#fff" }}
     >
       <Card.Title
@@ -46,7 +47,7 @@ export default function EquipmentCard({ equip }: CardProps) {
             </View>
             {/* 设备信息,图片，总工时，位置 */}
             <View style={{flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', marginTop: 10 }}>
-              <AntDesign name="car" size={48} color="black" style={{flexBasis: 60, flexGrow: 0, flexShrink: 0 }} />
+              <Image source={EquipTypeImages.find(p => p.key === equip.equipmentTypeKey)?.value} style={{flexBasis: 'auto', flexGrow: 0, flexShrink: 0 }} />
               <View style={{flexDirection: 'column', justifyContent: 'flex-start', alignItems: 'center', gap: 10, height: 60, flexBasis: 50, flexGrow: 1, flexShrink: 1 }}>
                 <Text style={{fontSize: 12, fontWeight: 300 }}>总工时：</Text>
                 <Text style={{fontSize: 12, fontWeight: 300 }}>位置：</Text>

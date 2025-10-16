@@ -32,7 +32,7 @@ export default function DeviceLayout() {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="devices/equipment-config" options={ {headerShown: false } } />
-      
+      <Stack.Screen name="devices/equipment-card-detail/update-detail" options={{headerShown: false}} />
     </Stack>
   );
 }

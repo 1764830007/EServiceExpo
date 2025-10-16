@@ -1,4 +1,4 @@
-import { EquipDetail } from "@/models/equipments/EquipmentDetail";
+import { EquipDetail, MachineDto } from "@/models/equipments/EquipmentDetail";
 import {
   DealerDto,
   EquipmentListDto,
@@ -51,5 +51,10 @@ export const UnBindEqiup = async(serialNumber: string) => {
   const res = await api.post<{success: boolean, error: string }>(`/services/app/EquipmentService/UnBindRequest`, {
     serialNumber: serialNumber
   });
+  return res.data;
+};
+// 修改设备详情信息
+export const UpdateEquipInfo = async(machine: MachineDto) => {
+  const res = await api.post<{success: boolean, error: string }>('/services/app/EquipmentService/Equipment', machine);
   return res.data;
 };

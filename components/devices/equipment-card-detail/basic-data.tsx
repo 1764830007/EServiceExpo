@@ -178,7 +178,7 @@ export default function BasicData({ equipDetail }: DetailProps) {
           {/* 申请解绑，修改设备详情 */}
           <View style={{ marginTop: 30, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
             <Button mode="contained" style={{borderRadius: 5}} onPress={() =>  setDialogVisible(true) }>申请解绑</Button>
-            <Button mode="contained" style={{borderRadius: 5}}>修改设备详情</Button>
+            <Button mode="contained" style={{borderRadius: 5}} onPress={() => router.push('/devices/equipment-card-detail/update-detail') }>修改设备详情</Button>
           </View>
       </ScrollView>
       {/* 申请解绑对话框 */}

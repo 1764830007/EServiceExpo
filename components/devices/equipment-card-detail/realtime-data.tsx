@@ -1,7 +1,10 @@
-import WebView from "react-native-webview";
+import { View } from "react-native";
 
 export default function RealTimeData() {
+
     return (
-        <WebView style={{flex: 1}} source={ {uri: 'https://www.bilibili.com'} } />
+        <View>
+            
+        </View>
     );
 }

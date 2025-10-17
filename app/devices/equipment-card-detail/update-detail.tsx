@@ -16,7 +16,7 @@ export default function UpdateDetail() {
   // 首次加载时候，把equipDetail里的machineNo复制给equipEditDto
   useEffect(() => {
     equipDetailStore.setEquipEditDto(equipDetail.machineDto);
-    console.log("equip detail Dto", equipDetail.machineDto);
+    //console.log("equip detail Dto", equipDetail.machineDto);
   }, [loading]);
 
   return (
@@ -41,7 +41,7 @@ export default function UpdateDetail() {
           <Text style={{ flexBasis: 100, flexWrap: "wrap" }}>名称备注</Text>
           <TextInput
             style={{ flexGrow: 1, flexShrink: 0 }}
-            value={equipEditDto.nameNote}
+            value={equipEditDto?.nameNote}
             onChangeText={(text) => equipDetailStore.setNameNote(text)}
           />
           <Feather
@@ -72,7 +72,7 @@ export default function UpdateDetail() {
           </Text>
           <TextInput
             style={{ flexGrow: 1, flexShrink: 0 }}
-            value={equipEditDto.country}
+            value={equipEditDto?.country}
             disabled
           />
         </View>
@@ -83,7 +83,7 @@ export default function UpdateDetail() {
           </Text>
           <TextInput
             style={{ flexGrow: 1, flexShrink: 0 }}
-            value={equipEditDto.postalCode}
+            value={equipEditDto?.postalCode}
             onChangeText={(postCode) => equipDetailStore.setPostCode(postCode)}
           />
           <Feather
@@ -100,7 +100,7 @@ export default function UpdateDetail() {
           </Text>
           <TextInput
             style={{ flexGrow: 1, flexShrink: 0 }}
-            value={equipEditDto.address}
+            value={equipEditDto?.address}
             disabled
           />
         </View>
@@ -130,7 +130,7 @@ export default function UpdateDetail() {
             {t("equipment.EquipmentSecondHand")}
           </Text>
           <Switch
-            value={equipEditDto.secondHand}
+            value={equipEditDto?.secondHand}
             onValueChange={(val) => equipDetailStore.setSecondHand(val)}
           />
         </View>

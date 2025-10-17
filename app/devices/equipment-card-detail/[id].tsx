@@ -2,11 +2,12 @@ import { GetEquipDetail } from "@/app/services/equipments/EquipmentService";
 import BasicData from "@/components/devices/equipment-card-detail/basic-data";
 import MaintainRecord from "@/components/devices/equipment-card-detail/maintain-record";
 import RealTimeData from "@/components/devices/equipment-card-detail/realtime-data";
+import UseAnalysis from "@/components/devices/equipment-card-detail/use-analysis";
 import equipmentDetailStore from "@/hooks/equipments/EquipmentDetailStore";
 import { useLocalization } from "@/hooks/locales/LanguageContext";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Appbar, SegmentedButtons } from "react-native-paper";
 
 type SelectedTab = 'realtimeData' | 'useAnalysis' | 'basicData' | 'maintainRecord';
@@ -18,6 +19,7 @@ export default function EquipmentCardDetail() {
   const equipDetailStore = equipmentDetailStore.useStore();
   // const { equipDetail } = equipDetailStore;
   const [selectedTab, setSelectedTab] = useState<SelectedTab>('realtimeData');
+  const [timeSpan, setTimeSpan] = useState<string>('totalHour');
 
   const loadEquipDetail = async() => {
     const res = await GetEquipDetail(id as string);
@@ -93,14 +95,11 @@ export default function EquipmentCardDetail() {
         />
         {/* 实时数据 */}
         {selectedTab === 'realtimeData' && (
-          <>
-           <Text>real time data </Text>
             <RealTimeData />
-          </>
         )}
         {/* 使用分析 */}
         {selectedTab === 'useAnalysis' && (
-            <RealTimeData />
+            <UseAnalysis timeSpan={timeSpan} setTimeSpan={setTimeSpan} />
         )}
         {/* 基本信息 */}
         {selectedTab === 'basicData' && (
